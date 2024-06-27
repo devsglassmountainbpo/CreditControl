@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import {
-       Table,
+    Table,
     Badge
 
 } from "flowbite-react";
@@ -457,6 +457,13 @@ const Reports: FC<any> = function ({ sharedState }: any) {
 
     }, []);
 
+    const [expandedRow, setExpandedRow] = useState(null);
+
+    const handleRowClick = (rowIndex: any) => {
+        setExpandedRow(rowIndex === expandedRow ? null : rowIndex);
+    };
+
+
     useEffect(() => {
         if (isReady) {
             const checkboxes: any = document.querySelectorAll('#devices input[type="checkbox"]');
@@ -472,73 +479,84 @@ const Reports: FC<any> = function ({ sharedState }: any) {
     return (
 
 
-        <Accordion  className="mx-0">
+        <Accordion className="mx-0">
 
             <Accordion.Panel>
                 <Accordion.Title onClick={() => handleSetActiveLink('uno')}>
                     <table className="w-full">
-
                         <tr>
                             <td className="text-left">
                                 <div className="flex justify-center items-center mb-2">
-                                    <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white  pe-1">General Report</h5>
-                                    <h1 className=" leading-none text-gray-900 dark:text-white pe-1">by Category</h1>
+                                    <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white pe-1">General Report</h5>
+                                    <h1 className="leading-none text-gray-900 dark:text-white pe-1">by Category</h1>
                                 </div>
                             </td>
                             <td className="text-right">
-                                <button onClick={exportToGraphis} className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full  right-0 top-10">
+                                <button onClick={exportToGraphis} className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full right-0 top-10">
                                     <HiTable className="h-7 w-7" />
                                 </button>
-                                {/* <Button onClick={exportToGraphis} className="mb-2 ml-2 bg-primary-500 text-gray-500  dark:bg-gray-800 dark:text-white dark:hover:text-white">
-                                <HiTable />excel
-                                </Button> */}
                             </td>
                         </tr>
                     </table>
                 </Accordion.Title>
                 <Accordion.Content hidden={activeLink !== 'uno'}>
-
                     <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
                         <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
                             <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-
                                 {['asset', 'total_qty', ...dataGraphis.header.filter(header => header !== 'total_qty' && header !== 'asset')].map((headerItem, index) => (
                                     <th key={index} scope="col" className="py-3 px-6">
                                         {headerItem}
                                     </th>
                                 ))}
-
                             </Table.Head>
                             <Table.Body>
                                 {dataGraphis.rows.map((row, rowIndex) => (
-                                    <Table.Row key={rowIndex} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                        {['asset', 'total_qty', ...dataGraphis.header.filter(header => header !== 'total_qty' && header !== 'asset')].map((headerItem, colIndex) => (
-                                            <Table.Cell key={colIndex} className="py-4 px-6 font-semibold">
-                                                {headerItem === 'asset' ? (
-                                                    // <Button className="bg-indigo-700 h-4 pt-0 dark:bg-indigo-800 dark:hover:bg-indigo-500">{(row as any)[headerItem]}</Button>
-                                                    <a
-                                                        className="bg-white text-gray-800 h-4 pt-0 dark:bg-gray-800 dark:text-white inline-block px-3 py-1 rounded"
-                                                        href={`/Inventory?filter=${(row as any)[headerItem]}`}
-                                                    >
-                                                        {(row as any)[headerItem]}
-                                                    </a>
-
-                                                ) : (headerItem === 'total') ? <Badge></Badge> : (
-                                                    // ) : (headerItem === 'total') ? <Badge>${(row as any)[headerItem]}</Badge> : (
-                                                    (row as any)[headerItem]
-                                                )}
-                                            </Table.Cell>
-                                        ))}
-                                    </Table.Row>
+                                    <>
+                                        <Table.Row key={rowIndex} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" onClick={() => handleRowClick(rowIndex)}>
+                                            {['asset', 'total_qty', ...dataGraphis.header.filter(header => header !== 'total_qty' && header !== 'asset')].map((headerItem, colIndex) => (
+                                                <Table.Cell key={colIndex} className="py-4 px-6 font-semibold">
+                                                    {headerItem === 'asset' ? (
+                                                        <a
+                                                            className="bg-white text-gray-800 h-4 pt-0 dark:bg-gray-800 dark:text-white inline-block px-3 py-1 rounded"
+                                                            href={`/Inventory?filter=${(row as any)[headerItem]}`}
+                                                        >
+                                                            {(row as any)[headerItem]}
+                                                        </a>
+                                                    ) : (
+                                                        (row as any)[headerItem]
+                                                    )}
+                                                </Table.Cell>
+                                            ))}
+                                        </Table.Row>
+                                        {expandedRow === rowIndex && (
+                                            <Table.Row className="bg-gray-100 dark:bg-gray-900">
+                                                <Table.Cell colSpan={dataGraphis.header.length}>
+                                                    <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
+                                                        <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
+                                                            <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                                                {/* Replace this with headers for the nested table */}
+                                                                <th className="py-3 px-6">Nested Header 1</th>
+                                                                <th className="py-3 px-6">Nested Header 2</th>
+                                                            </Table.Head>
+                                                            <Table.Body>
+                                                                {/* Replace this with rows for the nested table */}
+                                                                <Table.Row className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                                                    <Table.Cell className="py-4 px-6">Nested Data 1</Table.Cell>
+                                                                    <Table.Cell className="py-4 px-6">Nested Data 2</Table.Cell>
+                                                                </Table.Row>
+                                                            </Table.Body>
+                                                        </Table>
+                                                    </div>
+                                                </Table.Cell>
+                                            </Table.Row>
+                                        )}
+                                    </>
                                 ))}
-
                             </Table.Body>
                         </Table>
                     </div>
-
                 </Accordion.Content>
             </Accordion.Panel>
-
             <Accordion.Panel>
                 <Accordion.Title onClick={() => handleSetActiveLink('dos')}>
                     <table className="w-full">
@@ -584,7 +602,7 @@ const Reports: FC<any> = function ({ sharedState }: any) {
                                         <th scope="col" className="py-3 px-6">Total</th>
                                     </Table.Head>
                                     <Table.Body>
-                                        
+
                                         {data.filter((row: { [x: string]: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; asset: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; brand: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; category: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; vendor: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }, _index: Key | null | undefined) => row.asset === "Agents").map((row: { [x: string]: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; asset: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; brand: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; category: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; vendor: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; }, index: Key | null | undefined) => (
                                             <Table.Row key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                                 <td scope="col" className="py-3 px-6">{row.asset}</td>
