@@ -15,6 +15,9 @@ import Brand from "./pages/brand/brand";
 import Models from "./pages/models/models";
 import UserListPage from "./pages/users/Users";
 import AllReports from "./pages/reports/reports";
+import BanksAll from "./pages/banks/banks";
+import PaymentsAll from "./pages/payments/payments";
+
 import Categories from "./pages/categories/categories"
 import { Navigate } from 'react-router-dom';
 const container = document.getElementById("root");
@@ -71,10 +74,19 @@ root.render(
           element={user ? <AllReports /> : <Navigate to="/SignIn" />}
           index
         />
+        <Route
+          path="/banks"
+          element={user ? <BanksAll /> : <Navigate to="/SignIn" />}
+          index
+        />
 
         <Route
           path="/categories"
           element={user ? <Categories /> : <Navigate to="/SignIn" />}
+        />
+        <Route
+          path="/payments"
+          element={user ? <PaymentsAll /> : <Navigate to="/SignIn" />}
         />
       </Routes>
 

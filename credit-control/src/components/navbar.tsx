@@ -84,13 +84,29 @@ const ExampleNavbar: FC = function () {
           <FaUsers className="mr-2" />
           <span>Users</span>
         </Navbar.Link>
-        <Navbar.Link
+        {/* <Navbar.Link
           href="/reports"
           className={` flex items-center space-x-2 ${activeLink === 'reports' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
           onClick={() => handleSetActiveLink('reports')}
         >
           <FaBoxOpen className="mr-2" />
           <span>Reports</span>
+        </Navbar.Link> */}
+        <Navbar.Link
+          href="/banks"
+          className={` flex items-center space-x-2 ${activeLink === 'banks' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
+          onClick={() => handleSetActiveLink('banks')}
+        >
+          <FaBoxOpen className="mr-2" />
+          <span>Banks</span>
+        </Navbar.Link>
+        <Navbar.Link
+          href="/payments"
+          className={` flex items-center space-x-2 ${activeLink === 'payments' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
+          onClick={() => handleSetActiveLink('payments')}
+        >
+          <FaBoxOpen className="mr-2" />
+          <span>Payments</span>
         </Navbar.Link>
       </Navbar.Collapse>
     </Navbar>
