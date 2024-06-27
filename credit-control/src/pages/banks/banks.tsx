@@ -159,7 +159,7 @@ const BanksAll: FC = function () {
                 color: 'white' // Ensure text is visible against the dark background
             }} >                <div className="mb-1 w-full">
                     <div className="mb-4">
-                        <h1 style={{ zoom: 0.90 }} className="text-xl ml-4 mt-4 font-semibold text-gray-900 dark:text-white sm:text-2xl">
+                        <h1 style={{ zoom: 0.90 }} className="text-xl ml-4 mt-4 font-semibold text-white-900 dark:text-white sm:text-2xl">
                             List of banks
                         </h1>
                     </div>
