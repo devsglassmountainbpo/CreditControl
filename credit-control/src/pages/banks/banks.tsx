@@ -150,21 +150,21 @@ const BanksAll: FC = function () {
     return (
         <NavbarSidebarLayout2 isFooter={true} >
             <div className="block items-center justify-between border-b rounded-tl-2xl rounded-tr-2xl border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 sm:flex"
-               style={{
-                backgroundImage: 'url(https://wallpapercave.com/wp/VmZHnTO.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundColor: 'rgba(1, 123, 234, 4.2)',
-                position: 'relative',
-                color: 'white' // Ensure text is visible against the dark background
-            }} >                <div className="mb-1 w-full">
+                style={{
+                    backgroundImage: `linear-gradient(rgba(0, 0, 125, 0.7), rgba(120, 216, 230, 0.7)),
+                    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 95'%3E%3Crect width='100' height='100' fill='blue' /%3E%3Ccircle cx='25' cy='25' r='20' fill='cyan' /%3E%3Ccircle cx='75' cy='25' r='20' fill='cyan' /%3E%3Ccircle cx='25' cy='75' r='20' fill='cyan' /%3E%3Ccircle cx='75' cy='75' r='20' fill='cyan' /%3E%3C/svg%3E")`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    position: 'relative',
+                    color: 'white' // Ensure text is visible against the dark background
+                }}>               <div className="mb-1 w-full">
                     <div className="mb-4">
                         <h1 style={{ zoom: 0.90 }} className="text-xl ml-4 mt-4 font-semibold text-white-900 dark:text-white sm:text-2xl">
                             List of banks
                         </h1>
                     </div>
                     <div className="sm:flex" style={{ zoom: 0.90 }}>
-                        <div className="mb-3 ml-4 hidden items-center dark:divide-gray-700 sm:mb-0 sm:flex sm:divide-x sm:divide-gray-100">
+                        <div className="mb-3 ml-4 hidden items-center dark:divide-white-700 sm:mb-0 sm:flex sm:divide-x sm:divide-gray-100">
                             <form className="lg:pr-3">
                                 <Label htmlFor="users-search" className="sr-only">
                                     Search
@@ -812,8 +812,8 @@ const ExportModal: FC<any> = function (rawData) {
 
     return (
         <>
-            <Button onClick={() => setOpen(true)} color="gray">
-                <div className="flex items-center gap-x-3">
+            <Button onClick={() => setOpen(true)} className="bg-primary-300 dark:bg-green-400 dark:hover-bg-green-500" >
+                <div className="flex items-center gap-x-3 ">
                     <HiDocumentDownload className="text-xl" />
                     <span>Export</span>
                 </div>
