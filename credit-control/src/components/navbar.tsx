@@ -5,6 +5,7 @@ import { FaTags, FaStream, FaBoxOpen, FaUsers, FaList } from 'react-icons/fa'; /
 
 import { FaClone } from "react-icons/fa";
 
+import { HiLibrary } from "react-icons/hi";
 
 
 
@@ -97,7 +98,7 @@ const ExampleNavbar: FC = function () {
           className={` flex items-center space-x-2 ${activeLink === 'banks' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
           onClick={() => handleSetActiveLink('banks')}
         >
-          <FaBoxOpen className="mr-2" />
+          <HiLibrary className="mr-2" />
           <span>Banks</span>
         </Navbar.Link>
         <Navbar.Link

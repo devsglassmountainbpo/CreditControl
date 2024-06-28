@@ -21,6 +21,7 @@ import {
     HiOutlinePencilAlt
 } from "react-icons/hi";
 
+
 import NavbarSidebarLayout2 from "../../layouts/navbar-sidebar2";
 import axios from "axios";
 import { FiletypeCsv, FiletypeXlsx } from 'react-bootstrap-icons';
@@ -34,7 +35,7 @@ import CryptoJS from "crypto-js";
 import * as XLSX from 'xlsx';
 import { FaTags } from 'react-icons/fa'; // Ejemplo con FontAwesome
 
-import { FaClone } from "react-icons/fa";
+import { HiLibrary } from "react-icons/hi";
 
 
 const created_user3 = localStorage.getItem("badgeSession") || "";
@@ -64,7 +65,7 @@ const BanksAll: FC = function () {
     }
 
     useEffect(() => {
-        axios.get('https://bn.glassmountainbpo.com:8080/inventory/listBrad')
+        axios.get('https://bn.glassmountainbpo.com:8080/inventory/listBanks')
             .then(res => {
                 if (userLevel === '2') {
                     // Filter data where supervisorBadge equals created_user
@@ -81,6 +82,7 @@ const BanksAll: FC = function () {
 
     const [searchInput, setSearchInput] = useState('');
     const onChange = (e: { target: { value: SetStateAction<string>; }; }) => {
+        setCurrentPage(1);
         setSearchInput(e.target.value);
     };
 
@@ -119,7 +121,9 @@ const BanksAll: FC = function () {
     //Prevent user from using the Enter key when using the search/filter bar
     const handleKeyDown = (e: any) => {
         if (e.key === "Enter") {
+
             e.preventDefault();
+
         }
     }
 
@@ -181,8 +185,8 @@ const BanksAll: FC = function () {
                             </form>
                             <div className="mt-3 flex space-x-1 pl-0 sm:mt-0 sm:pl-2">
                                 <a
-                                    href="/Brand"
-                                    className="inline-flex cursor-pointer justify-center rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                                    href="/banks"
+                                    className="inline-flex cursor-pointer justify-center rounded p-1 bg-primary-50 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                                 >
                                     <span className="sr-only">Refresh</span>
                                     <HiRefresh className="text-2xl" />
@@ -211,7 +215,9 @@ const BanksAll: FC = function () {
 
                                     <Table.HeadCell className="">ID</Table.HeadCell>
                                     <Table.HeadCell className="">Name</Table.HeadCell>
-                                    <Table.HeadCell className="hover:cursor-pointer hover:text-blue-500">Category Name</Table.HeadCell>
+                                    <Table.HeadCell className="hover:cursor-pointer hover:text-blue-500">Method payment</Table.HeadCell>
+                                    <Table.HeadCell className="hover:cursor-pointer hover:text-blue-500">Bank check payment</Table.HeadCell>
+                                    <Table.HeadCell className="hover:cursor-pointer hover:text-blue-500">Bank Account</Table.HeadCell>
                                     <Table.HeadCell className="hover:cursor-pointer hover:text-blue-500">Status</Table.HeadCell>
                                     <Table.HeadCell className="hover:cursor-pointer hover:text-blue-500">Date Created</Table.HeadCell>
 
@@ -236,7 +242,7 @@ const BanksAll: FC = function () {
                                                 <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
                                                     <div style={{ display: 'flex', alignItems: 'center' }}>
 
-                                                        <FaClone className="mr-2" />
+                                                        <HiLibrary className="mr-2" />
                                                         <span className="text-dark-800 font-semibold px-2 py-0.5 rounded dark:text-white">
                                                             {user.name}
                                                         </span>
@@ -245,18 +251,39 @@ const BanksAll: FC = function () {
 
                                                 </Table.Cell>
 
-                                                <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
+                                                <Table.Cell className="whitespace-nowrap p-4 text-base font-sm text-gray-600 dark:text-white">
 
                                                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                        <FaTags className="mr-2" />
 
                                                         <span className="text-dark-800 font-semibold px-2 py-0.5 rounded dark:text-white">
-                                                            {user.name_category}
+                                                            {user.method}
                                                         </span>
 
                                                     </div>
                                                 </Table.Cell>
-                                                <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
+                                                <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-600 dark:text-white">
+
+                                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+
+
+                                                        <span className="text-dark-800 font-semibold px-2 py-0.5 rounded dark:text-white">
+                                                            {user.bank_check == 'nan' ? 'N/A' : user.bank_check}
+                                                        </span>
+
+                                                    </div>
+                                                </Table.Cell>
+                                                <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-600 dark:text-white">
+
+                                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+
+
+                                                        <span className="text-dark-800 font-semibold px-2 py-0.5 rounded dark:text-white">
+                                                            {user.bank_account == 'nan' ? 'N/A' : user.bank_account}
+                                                        </span>
+
+                                                    </div>
+                                                </Table.Cell>
+                                                <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-600 dark:text-white">
                                                     <span className=" text-black-800 font-bold px-2 py-0.5 rounded dark:text-white">
                                                         {user.active == 1 ? 'Active' : 'Inactive'}
 
@@ -389,10 +416,18 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
     const [name, setName] = useState('');
     const [statusActive, setStatusActive] = useState('');
-    const [nameCategory, setNameCategory] = useState('');
+
+    // Bank Check Payment
+    const [bankCheckPayment, setBankCheckPayment] = useState('');
+    // Bank  account n
+    const [bankAccountNumber, setBankAccountNumber] = useState('');
+
+
+
+    const [methodPayment, setMethodCategory] = useState('');
     const [idCategory, setIdCategory] = useState('');
 
-    console.log('estas son la categorias seleccionadas', nameCategory, idCategory)
+    console.log('estas son la categorias seleccionadas', methodPayment, idCategory)
 
 
     const urlHired = `https://bn.glassmountainbpo.com:8080/api/hired/`;
@@ -445,7 +480,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                     statusActive,
                     created_user,
                     idCategory,
-                    nameCategory,
+                    methodPayment,
                     info
                 })
                 if (response.status == 200) {
@@ -535,17 +570,29 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
 
 
+    useEffect(() => {
+        if (methodPayment === 'BANK CHECK') {
+            setBankCheckPayment('');
+        } else if (methodPayment === 'ACCOUNT BANK NUMBER') {
+            setBankAccountNumber('');
+        } else if (methodPayment === '') {
+            setBankCheckPayment('');
+            setBankAccountNumber('');
+        }
+    }, [methodPayment]);
+
+
     return (
         <>
             <Button color="primary" onClick={() => { setOpen(true) }}>
                 <div className="flex items-center gap-x-3">
                     <HiPlus className="text-xl" />
-                    Add Brand
+                    Add Bank
                 </div>
             </Button>
             <Modal onClose={() => setOpen(false)} show={isOpen}>
                 <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-                    <strong>Add new brand!</strong>
+                    <strong>Add new bank!</strong>
                 </Modal.Header>
                 <Modal.Body>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -566,15 +613,15 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                         </div>
                         <div>
 
-                            <Label htmlFor="vendor">Category</Label>
+                            <Label htmlFor="vendor">Method Payment</Label>
                             <div className="mt-1">
                                 <Select onChange={(e) => {
                                     const selectedIndex = e.target.selectedIndex;
-                                    const selectedName = e.target.value;
-                                    setNameCategory(selectedName);
+                                    const selectedMethod = e.target.value;
+                                    setMethodCategory(selectedMethod);
                                     setIdCategory(dataInternal[selectedIndex].id);
                                 }}>
-                                    {
+                                    {/* {
                                         dataInternal
                                             .sort((a, b) => a.name.localeCompare(b.name))
                                             .map((user) => (
@@ -582,12 +629,56 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                                                     {user.name}
                                                 </option>
                                             ))
-                                    }
+
+                                            
+                                    } */}
+
+                                    <option value="">SELECTED</option>
+                                    <option value="BANK CHECK">BANK CHECK</option>
+                                    <option value="ACCOUNT BANK NUMBER">ACCOUNT BANK NUMBER</option>
 
                                 </Select>
 
                             </div>
 
+                        </div>
+                        <div>
+                            <Label htmlFor="check">Bank Check Payment</Label>
+                            <div className="mt-1">
+                                <TextInput
+                                    id="check"
+                                    name="check"
+                                    value={bankCheckPayment}
+                                    onChange={(e) => {
+                                        if (methodPayment !== 'ACCOUNT BANK NUMBER' && methodPayment !== '') {
+                                            setBankCheckPayment(e.target.value);
+                                            setBankAccountNumber('');
+                                        }
+                                    }}
+                                    readOnly={methodPayment === 'ACCOUNT BANK NUMBER' || methodPayment === ''}
+                                    disabled={methodPayment === 'ACCOUNT BANK NUMBER' || methodPayment === ''}
+                                >
+                                </TextInput>
+                            </div>
+                        </div>
+                        <div>
+                            <Label htmlFor="bank">Bank Account Number</Label>
+                            <div className="mt-1">
+                                <TextInput
+                                    id="bank"
+                                    name="bank"
+                                    value={bankAccountNumber}
+                                    onChange={(e) => {
+                                        if (methodPayment !== 'BANK CHECK' && methodPayment !== '') {
+                                            setBankAccountNumber(e.target.value);
+                                            setBankCheckPayment('')
+                                        }
+                                    }}
+                                    readOnly={methodPayment === 'BANK CHECK' || methodPayment === ''}
+                                    disabled={methodPayment === 'BANK CHECK' || methodPayment === ''}
+                                >
+                                </TextInput>
+                            </div>
                         </div>
                         <div>
 
@@ -634,7 +725,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                         Save
                     </Button>
                 </Modal.Footer>
-            </Modal>
+            </Modal >
         </>
     );
 };
@@ -748,14 +839,21 @@ const ExportModal: FC<any> = function (rawData) {
 
     const convertToCSV = (data: any) => {
         const csvRows = [];
-        const headers = Object.keys(data[0]);
+        const allHeaders = Object.keys(data[0]);
+        const desiredOrder = ['id', 'name', 'method', 'bank_account', 'bank_check', 'active', 'date_created'];
+
+        const headers = desiredOrder.filter(header => allHeaders.includes(header));
 
         // Modificar las cabeceras según sea necesario
         const modifiedHeaders = headers.map(header => {
             if (header === 'date_created') {
-                return header.replace('_', ' ').toUpperCase(); // Convertir a mayúsculas y reemplazar '_' con ' '
-            } else if (header === 'id_groups') {
-                return 'ID GROUPS'; // Cambiar el nombre de la cabecera
+                return header.toUpperCase(); // Convertir a mayúsculas
+            } else if (header === 'bank_account') {
+                return 'BANK ACCOUNT'; // Cambiar el nombre de la cabecera
+            } else if (header === 'bank_check') {
+                return 'BANK CHECK'; // Cambiar el nombre de la cabecera
+            } else if (header === 'method') {
+                return 'METHOD'; // Cambiar el nombre de la cabecera
             } else {
                 return header.toUpperCase(); // Convertir a mayúsculas
             }
@@ -769,7 +867,7 @@ const ExportModal: FC<any> = function (rawData) {
                     // Formatear las fechas como dd/mm/yyyy
                     const date = new Date(row[header]);
                     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-                } else if (header === 'id_groups') {
+                } else if (header === 'name') {
                     // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
                     return row[header].split(',').join(' - ');
                 } else {
@@ -790,11 +888,13 @@ const ExportModal: FC<any> = function (rawData) {
         console.log(data);
 
         const csvContent = convertToCSV(data);
-        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' }); // Añadir BOM para Excel
+
+        // const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'brandsReports.csv';
+        a.download = 'banksReports.csv';
         a.click();
         window.URL.revokeObjectURL(url);
         setOpen(false);
@@ -812,7 +912,7 @@ const ExportModal: FC<any> = function (rawData) {
 
     return (
         <>
-            <Button onClick={() => setOpen(true)} className="bg-primary-300 dark:bg-green-400 dark:hover-bg-green-500" >
+            <Button onClick={() => setOpen(true)} className="bg-green-400 hover:bg-green-500 dark:bg-green-400 dark:hover-bg-green-500" >
                 <div className="flex items-center gap-x-3 ">
                     <HiDocumentDownload className="text-xl" />
                     <span>Export</span>
