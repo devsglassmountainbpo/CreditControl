@@ -542,7 +542,7 @@ const AddUserModal: FC = function () {
     const handleSubmit = async (e: React.FormEvent, id_rol: any, id_job: any) => {
         e.preventDefault()
         try {
-            const response = await axios.post('https://bn.glassmountainbpo.com:8080/invetory_users/save', {
+            const response = await axios.post('https://bn.glassmountainbpo.com:8080/creditControl/save', {
                 badge,
                 username,
                 password,
@@ -558,6 +558,7 @@ const AddUserModal: FC = function () {
 
                 if (responseData.message === "Usuario guardado exitosamente") {
                     setOpen(false);
+                    location.reload()
                 } else {
                     console.log("Fatal Error");
                 }
