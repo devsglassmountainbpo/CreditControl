@@ -64,7 +64,7 @@ const UserListPage: FC = function () {
     }
 
     useEffect(() => {
-        axios.get('https://bn.glassmountainbpo.com:8080/inventory/users')
+        axios.get('https://bn.glassmountainbpo.com:8080/creditControl/users')
             .then(res => setData(res.data))
     }, [sharedState])
 
@@ -73,11 +73,7 @@ const UserListPage: FC = function () {
         setSearchInput(e.target.value);
     };
 
-
     //Avatars
-
-
-
 
     useEffect(() => {
         if (searchInput !== '') {
