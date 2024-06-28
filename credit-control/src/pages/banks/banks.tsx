@@ -671,7 +671,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                                     onChange={(e) => {
                                         if (methodPayment !== 'BANK CHECK' && methodPayment !== '') {
                                             setBankAccountNumber(e.target.value);
-                                            setBankCheckPayment('')
+                                            setBankCheckPayment('');
                                         }
                                     }}
                                     readOnly={methodPayment === 'BANK CHECK' || methodPayment === ''}
