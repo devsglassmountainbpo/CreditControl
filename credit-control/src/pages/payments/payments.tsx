@@ -36,7 +36,7 @@ const PaymentsAll: FC = function () {
 
     const [sharedState, setSharedState] = useState(false);
 
-     
+
 
 
     const updateSharedState = (newValue: boolean) => {
@@ -59,13 +59,8 @@ const PaymentsAll: FC = function () {
 const Payment: FC<any> = function ({ sharedState }: any) {
 
 
-    //Definiendo la interface:
-    interface DataGraphis {
-        header: string[];
-        rows: { [key: string]: string | number }[];
-    }
-
-    const [dataGraphis, setDataGraphis] = useState<DataGraphis>({ header: [], rows: [] });
+    
+    const [dataGraphis, setDataGraphis] = useState([]);
     // const [dataTotal, setDataTotal] = useState<totalSummary>({ total: '' });
 
 
@@ -82,7 +77,6 @@ const Payment: FC<any> = function ({ sharedState }: any) {
     };
 
     console.log(activeLink)
-
     //filtrando datos para los reportes
 
 
@@ -90,11 +84,11 @@ const Payment: FC<any> = function ({ sharedState }: any) {
         const fetchData = async () => {
             try {
                 const [graphisRes] = await Promise.all([
-                    axios.get('https://bn.glassmountainbpo.com:8080/inventory/stockSummary'),
+                    axios.get('https://bn.glassmountainbpo.com:8080/credit/payments'),
                 ]);
 
                 setDataGraphis(graphisRes.data);
-                
+
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -121,7 +115,6 @@ const Payment: FC<any> = function ({ sharedState }: any) {
         // Convertir todos los encabezados a mayúsculas y agregar la nueva columna para la fecha del reporte
         const headers = [...originalHeaders.map(header => header.toUpperCase()), 'DATE_REPORT']; // Fecha al final
 
-        const rows = dataGraphis.rows;
 
         // Obtener la fecha actual
         const currentDate = getCurrentDate();
@@ -213,6 +206,7 @@ const Payment: FC<any> = function ({ sharedState }: any) {
 
 
 
+
     return (
         <div>
             <div className="block items-center justify-between border-b rounded-tl-2xl rounded-tr-2xl border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-700 sm:flex"
@@ -242,7 +236,7 @@ const Payment: FC<any> = function ({ sharedState }: any) {
                         <div className="ml-auto mr-4 flex items-center space-x-2 sm:space-x-3">
                             <AddTaskModal
                                 sharedState={sharedState}
-                                 />
+                            />
                             <ExportModal
                                 data={data} />
                         </div>
@@ -270,49 +264,77 @@ const Payment: FC<any> = function ({ sharedState }: any) {
                 <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
                     <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
                         <Table.Head >
-                            {['asset', 'total_qty', ...dataGraphis.header.filter(header => header !== 'total_qty' && header !== 'asset')].map((headerItem, index) => (
-                                <Table.HeadCell key={index} scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
-                                    {headerItem}
-                                </Table.HeadCell>
-                            ))}
-                        </Table.Head>
-                        <Table.Body>
-                            {dataGraphis.rows.map((row, rowIndex) => (
-                                <>
-                                    <Table.Row key={rowIndex} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" onClick={() => handleRowClick(rowIndex)}>
-                                        {['asset', 'total_qty', ...dataGraphis.header.filter(header => header !== 'total_qty' && header !== 'asset')].map((headerItem, colIndex) => (
-                                            <Table.Cell key={colIndex} className="py-4 px-6 font-semibold">
-                                                {headerItem === 'asset' ? (
-                                                    <>
-                                                        <a
-                                                            className="bg-white text-gray-800 h-4 pt-0 dark:bg-gray-800 dark:text-white inline-block px-3 py-1 rounded"
-                                                            href={`/Inventory?filter=${(row as any)[headerItem]}`}
-                                                        >
-                                                            {(row as any)[headerItem]}
-                                                        </a>
-                                                        <button onClick={exportToGraphis} className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full right-0 top-10">
-                                                            <HiTable className="h-7 w-7" />
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    (row as any)[headerItem]
 
-                                                )}
+                            <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
+                                row
+                            </Table.HeadCell>
+                            <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
+                                id
+                            </Table.HeadCell>
+                            <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
+                                name
+                            </Table.HeadCell>
+                            <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
+                                Pending
+                            </Table.HeadCell>
+                            <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
+                                Completed
+                            </Table.HeadCell>
+                            <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
+                                Actions
+                            </Table.HeadCell>
+
+                        </Table.Head>
+
+
+
+
+                        <Table.Body>
+                            {dataGraphis.map((row: any, rowIndex: any) => (
+                                <>
+                                    <Table.Row
+                                        key={rowIndex}
+                                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                                        onClick={() => handleRowClick(rowIndex)}
+                                    >
+                                        {Object.keys(row).map(( e) => (
+                                            <Table.Cell  className="py-4 px-6 font-semibold">
+                                                <>
+                                                    <a
+                                                        className="bg-white text-gray-800 h-4 pt-0 dark:bg-gray-800 dark:text-white inline-block px-3 py-1 rounded"
+                                                        href={`/Inventory?filter=${row[e]}`}
+                                                    >
+                                                        {row[e]}
+                                                    </a>
+                                                  
+                                                </>
+                                                <Table.Cell>
+                                                 
                                             </Table.Cell>
+                                               
+                                            </Table.Cell>
+                                           
                                         ))}
+
+                                        <Table.Cell>
+                                        <button
+                                                        onClick={exportToGraphis}
+                                                        className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full right-0 top-10"
+                                                    >
+                                                        <HiTable className="h-7 w-7" />
+                                                    </button>
+                                        </Table.Cell>
                                     </Table.Row>
                                     {expandedRow === rowIndex && (
                                         <Table.Row className="bg-gray-100 dark:bg-gray-900">
-                                            <Table.Cell colSpan={dataGraphis.header.length}>
+                                            <Table.Cell colSpan={Object.keys(row).length}>
                                                 <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
                                                     <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
                                                         <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                                            {/* Replace this with headers for the nested table */}
-                                                            <th className="py-3 px-6">Nested Header 1</th>
-                                                            <th className="py-3 px-6">Nested Header 2</th>
+                                                            <Table.HeadCell>Nested Header 1</Table.HeadCell>
+                                                            <Table.HeadCell>Nested Header 2</Table.HeadCell>
                                                         </Table.Head>
                                                         <Table.Body>
-                                                            {/* Replace this with rows for the nested table */}
                                                             <Table.Row className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                                                 <Table.Cell className="py-4 px-6">Nested Data 1</Table.Cell>
                                                                 <Table.Cell className="py-4 px-6">Nested Data 2</Table.Cell>
@@ -326,6 +348,8 @@ const Payment: FC<any> = function ({ sharedState }: any) {
                                 </>
                             ))}
                         </Table.Body>
+
+
                     </Table>
                 </div>
             </div>
@@ -553,7 +577,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                                     setMethodCategory(selectedMethod);
                                     // setIdCategory(dataInternal[selectedIndex].id);
                                 }}>
-                                  
+
                                     <option value="">SELECTED</option>
                                     <option value="BANK CHECK">BANK CHECK</option>
                                     <option value="ACCOUNT BANK NUMBER">ACCOUNT BANK NUMBER</option>
