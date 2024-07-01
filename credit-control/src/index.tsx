@@ -8,17 +8,11 @@ import { Flowbite } from "flowbite-react";
 import { Routes, Route } from "react-router";
 import { BrowserRouter } from "react-router-dom";
 import SignInPage from "./pages/authentication/login";
-import DevsDashboard from "./pages/devs/devsDashboard";
 import Inventory from "./pages/inventory/inventory";
-import Category from "./pages/category/category";
-import Brand from "./pages/brand/brand";
-import Models from "./pages/models/models";
 import UserListPage from "./pages/users/Users";
 import AllReports from "./pages/reports/reports";
 import BanksAll from "./pages/banks/banks";
 import PaymentsAll from "./pages/payments/payments";
-
-import Categories from "./pages/categories/categories"
 import { Navigate } from 'react-router-dom';
 const container = document.getElementById("root");
 
@@ -40,27 +34,12 @@ root.render(
 
         <Route
           path="/"
-          element={user ? <DevsDashboard /> : <Navigate to="/SignIn" />}
+          element={user ? <Inventory /> : <Navigate to="/SignIn" />}
         />
 
         <Route
           path="/Inventory"
           element={user ? <Inventory /> : <Navigate to="/SignIn" />}
-        />
-
-        <Route
-          path="/Category"
-          element={user ? <Category /> : <Navigate to="/SignIn" />}
-        />
-
-        <Route
-          path="/Brand"
-          element={user ? <Brand /> : <Navigate to="/SignIn" />}
-        />
-
-        <Route
-          path="/Models"
-          element={user ? <Models /> : <Navigate to="/SignIn" />}
         />
 
         <Route
@@ -80,10 +59,6 @@ root.render(
           index
         />
 
-        <Route
-          path="/categories"
-          element={user ? <Categories /> : <Navigate to="/SignIn" />}
-        />
         <Route
           path="/payments"
           element={user ? <PaymentsAll /> : <Navigate to="/SignIn" />}

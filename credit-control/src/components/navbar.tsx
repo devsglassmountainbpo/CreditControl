@@ -38,38 +38,6 @@ const ExampleNavbar: FC = function () {
       </div>
       <Navbar.Collapse>
         <Navbar.Link
-          href="/Category"
-          className={`flex items-center space-x-2 ${activeLink === 'Category' ? 'bg-blue text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
-          onClick={() => handleSetActiveLink('Category')}
-        >
-          <FaTags className="mr-2" />
-          <span>Asset</span>
-        </Navbar.Link>
-        <Navbar.Link
-          href="/Brand"
-          className={`flex items-center space-x-2 ${activeLink === 'Brand' ? 'bg-blue  text-primary-700  hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
-          onClick={() => handleSetActiveLink('Brand')}
-        >
-          <FaClone className="mr-2" />
-          <span>Brand</span>
-        </Navbar.Link>
-        <Navbar.Link
-          href="/Models"
-          className={`flex items-center space-x-2 ${activeLink === 'Models' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
-          onClick={() => handleSetActiveLink('Models')}
-        >
-          <FaStream className="mr-2" />
-          <span>Models</span>
-        </Navbar.Link>
-        <Navbar.Link
-          href="/Categories"
-          className={`flex items-center space-x-2 ${activeLink === 'Categories' ? 'bg-blue text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
-          onClick={() => handleSetActiveLink('Categories')}
-        >
-          <FaList className="mr-2" />
-          <span>Category</span>
-        </Navbar.Link>
-        <Navbar.Link
           href="/Inventory"
           className={`flex items-center space-x-2 ${activeLink === 'Inventory' ? 'bg-blue text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
           onClick={() => handleSetActiveLink('Inventory')}
