@@ -1,22 +1,29 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import {
+    Modal,
+    Select,
     Table,
-    Badge
-
+    TextInput,
+    Button,
+    Label
 } from "flowbite-react";
 import type { FC, JSXElementConstructor, Key, ReactElement, ReactFragment, ReactPortal } from "react";
 import { useEffect, useState } from "react";
 
 import { HiTable } from "react-icons/hi";
-
+import {
+    HiDocumentDownload,
+    HiPlus,
+} from "react-icons/hi";
 
 import NavbarSidebarLayout2 from "../../layouts/navbar-sidebar2";
 import axios from "axios";
-import { Accordion } from "flowbite-react";
-
-
 import CryptoJS from "crypto-js";
 import { utils, writeFile } from 'xlsx-js-style';
+import { FiletypeCsv, FiletypeXlsx } from 'react-bootstrap-icons';
+import UAParser from 'ua-parser-js';
+import * as XLSX from 'xlsx';
+
 
 
 
@@ -28,6 +35,14 @@ const created_user = (created_user2 ? created_user2.toString(CryptoJS.enc.Utf8) 
 const PaymentsAll: FC = function () {
 
     const [sharedState, setSharedState] = useState(false);
+
+     
+
+
+    const updateSharedState = (newValue: boolean) => {
+
+        setSharedState(newValue);
+    }
 
 
     console.log('$%^CreateUser', created_user, setSharedState)
@@ -50,31 +65,11 @@ const Payment: FC<any> = function ({ sharedState }: any) {
         rows: { [key: string]: string | number }[];
     }
 
-    interface totalSummary {
-        total: string;
-    }
-
-
     const [dataGraphis, setDataGraphis] = useState<DataGraphis>({ header: [], rows: [] });
     // const [dataTotal, setDataTotal] = useState<totalSummary>({ total: '' });
 
-    const [dataTotal, setDataTotal] = useState<totalSummary[]>([]);
 
     const [data, setData]: any = useState([]);
-    const [data_perClient, setData_perClient]: any = useState([]);
-    const [days, setDays]: any = useState([]);
-
-    const [dataw, setDataw]: any = useState([]);
-    const [daysw, setDaysw]: any = useState([]);
-
-
-    // var para filtrar solamente por dia 
-    const today = new Date();
-    const currentDay = today.getDate();
-    // const currentMonth = today.getMonth() + 1; // Los meses en JS van de 0 a 11
-    // const currentYear = today.getFullYear();
-
-
     const [activeLink, setActiveLink] = useState('');
 
 
@@ -90,26 +85,16 @@ const Payment: FC<any> = function ({ sharedState }: any) {
 
     //filtrando datos para los reportes
 
-    console.log('Preparando los reportes', data);
-    console.log('Preparando los reportesLIMTADOS ', data_perClient);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [graphisRes, totalRes, report, reporClient, reportW] = await Promise.all([
+                const [graphisRes] = await Promise.all([
                     axios.get('https://bn.glassmountainbpo.com:8080/inventory/stockSummary'),
-                    axios.get('https://bn.glassmountainbpo.com:8080/inventory/total_summmary'),
-                    // axios.get('https://bn.glassmountainbpo.com:8080/inventory/monthly_report'),
-                    axios.get('https://bn.glassmountainbpo.com:8080/inventory/monthly_report_new'),
-                    axios.get('https://bn.glassmountainbpo.com:8080/inventory/report_per_client'),
-                    axios.get('https://bn.glassmountainbpo.com:8080/inventory/monthly_one')
                 ]);
 
                 setDataGraphis(graphisRes.data);
-                setDataTotal(totalRes.data);
-                setData(report.data);
-                setData_perClient(reporClient.data);
-                setDataw(reportW.data);
+                
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -117,29 +102,6 @@ const Payment: FC<any> = function ({ sharedState }: any) {
 
         fetchData();
     }, [sharedState]);
-
-    useEffect(() => {
-        if (data.length) {
-            const days = Object.keys(data[0])
-                .filter(key => !['asset', 'brand', 'category', 'vendor', 'total'].includes(key));
-
-            setDays(days);
-        }
-    }, [data]);
-
-
-    useEffect(() => {
-        if (dataw.length) {
-            const days2 = Object.keys(dataw[0])
-                .filter(key => !['asset', 'DISMISSED', 'Damaged', 'Repair', 'STOCK', 'total'].includes(key))
-                .map(key => parseInt(key, 10))
-                .sort((a, b) => a - b)
-                .map(day => day.toString().padStart(2, '0'));
-
-            setDaysw(days2);
-        }
-    }, [dataw]);
-
 
 
 
@@ -214,232 +176,6 @@ const Payment: FC<any> = function ({ sharedState }: any) {
 
 
 
-
-    const exportToExcel = () => {
-        // Obtener la fecha actual
-        const currentDate = getCurrentDate();
-        const today = new Date();
-        const currentDay = today.getDate();
-        const currentMonth = today.toLocaleString('default', { month: 'long' });
-
-        // Definir el orden deseado para las columnas
-        const fixedFields = ['asset', 'brand', 'category', 'total'];
-        const dayFields = Object.keys(data[0]).filter(key => key.match(/^\d{2}June$/));
-        const additionalFields = ['vendor'];
-        const newField = ['Report_date'];
-
-        // Combinar todos los campos en el orden deseado
-        const headers = [...fixedFields, ...dayFields, ...additionalFields, ...newField];
-
-        // Reorganizar los datos según el nuevo orden de los campos
-        const formattedData = data.map((row: { [x: string]: any; }) => {
-            let formattedRow: any = {};
-            headers.forEach(header => {
-                if (header === 'Report_date') {
-                    formattedRow[header] = currentDate; // Añadir la fecha actual
-                } else if (dayFields.includes(header)) {
-                    const dayNumber = parseInt(header, 10);
-                    if (dayNumber > currentDay && currentMonth === "June") {
-                        formattedRow[header] = ''; // Dejar en blanco si es una fecha futura
-                    } else {
-                        formattedRow[header] = row[header]; // Copiar el valor del campo correspondiente
-                    }
-                } else {
-                    formattedRow[header] = row[header]; // Copiar el valor del campo correspondiente
-                }
-            });
-            return formattedRow;
-        });
-
-        // Crear la hoja de cálculo
-        const wsAgents = utils.json_to_sheet(formattedData, { header: headers });
-
-        // Aplicar estilos a los encabezados
-        headers.forEach((_header, index) => {
-            const cellAddress = utils.encode_cell({ r: 0, c: index }); // Celda en la primera fila (0) y columna correspondiente (index)
-            if (!wsAgents[cellAddress]) wsAgents[cellAddress] = {}; // Asegúrate de que la celda existe
-            wsAgents[cellAddress].s = {
-                fill: {
-                    fgColor: { rgb: "000000" } // Fondo negro
-                },
-                font: {
-                    color: { rgb: "FFFFFF" }, // Texto blanco
-                    bold: true // Texto en negrita para mayor claridad
-                },
-                alignment: {
-                    horizontal: 'center', // Alineación horizontal
-                    vertical: 'center' // Alineación vertical
-                }
-            };
-        });
-
-        // Ajustar el tamaño de las columnas al contenido
-        const columnWidths = headers.map(header => ({ wch: header.length + 5 })); // Ajusta según sea necesario
-        wsAgents['!cols'] = columnWidths;
-
-        // Crear un libro de trabajo
-        const wb = utils.book_new();
-        utils.book_append_sheet(wb, wsAgents, 'Report');
-
-        // Guardar el archivo Excel
-        writeFile(wb, 'exported_data.xlsx');
-    };
-
-
-    const exportToExcelSegment = () => {
-        // Obtener la fecha actual
-        const currentDate: string = getCurrentDate();
-        const currentDateObj: Date = new Date();
-        const currentDay: number = currentDateObj.getDate();
-        const currentMonth: string = currentDateObj.toLocaleString('default', { month: 'long' });
-
-        // Definir el orden deseado para las columnas
-        const fixedFields: string[] = ['groups', 'total'];
-
-        // Obtener todos los días del mes
-        const dayFields: string[] = Object.keys(data_perClient[0]).filter(key => key.match(new RegExp(`^\\d{2}${currentMonth}$`)));
-
-        const additionalFields: string[] = [];
-        const newField: string[] = ['Report_date'];
-
-        // Combinar todos los campos en el orden deseado
-        const headers: string[] = [...fixedFields, ...dayFields, ...additionalFields, ...newField];
-
-        const groupedData: { [key: string]: any } = {};
-        const agentsData: any[] = [];
-
-        // Agrupar datos por "asset"
-        data_perClient.forEach((row: { [key: string]: any }) => {
-            if (row["asset"] === "Agents") {
-                // Mantener las filas de "Agents" tal como están
-                agentsData.push(row);
-            } else {
-                if (!groupedData[row["asset"]]) {
-                    groupedData[row["asset"]] = {
-                        groups: row["asset"],
-                        total: 0,
-                        Report_date: currentDate
-                    };
-                }
-
-                groupedData[row["asset"]].total += parseFloat(row["total"]);
-                dayFields.forEach(day => {
-                    if (!groupedData[row["asset"]][day]) {
-                        groupedData[row["asset"]][day] = 0;
-                    }
-                    if (parseInt(day.slice(0, 2)) <= currentDay) {
-                        groupedData[row["asset"]][day] += parseFloat(row[day] || 0);
-                    }
-                });
-            }
-        });
-
-        const formattedData: any[] = Object.values(groupedData).map((asset: any) => {
-            let formattedRow: { [key: string]: any } = {};
-            headers.forEach((header: string) => {
-                if (header === 'Report_date') {
-                    formattedRow[header] = currentDate; // Añadir la fecha actual
-                } else if (dayFields.includes(header) && parseInt(header.slice(0, 2)) > currentDay) {
-                    formattedRow[header] = ""; // Dejar en blanco los días después de la fecha actual
-                } else {
-                    formattedRow[header] = asset[header] !== undefined ? asset[header] : ""; // Copiar el valor del campo correspondiente o dejar en blanco
-                }
-            });
-            return formattedRow;
-        });
-
-        // Agregar los datos de "Agents" al principio del formattedData
-        agentsData.forEach((agentRow: { [key: string]: any }) => {
-            let formattedRow: { [key: string]: any } = {};
-            headers.forEach((header: string) => {
-                if (header === 'Report_date') {
-                    formattedRow[header] = currentDate; // Añadir la fecha actual
-                } else if (header === 'groups') {
-                    formattedRow[header] = agentRow["asset"] + ' ' + agentRow["category"]; // Asegurarse de que "groups" tenga el valor "asset + category" para Agents
-                } else if (dayFields.includes(header) && parseInt(header.slice(0, 2)) > currentDay) {
-                    formattedRow[header] = ""; // Dejar en blanco los días después de la fecha actual
-                } else {
-                    formattedRow[header] = agentRow[header] !== undefined ? agentRow[header] : ""; // Copiar el valor del campo correspondiente o dejar en blanco
-                }
-            });
-            formattedData.unshift(formattedRow); // Insertar al principio
-        });
-
-        // Insertar una fila negra después de los datos de "Agents"
-        if (agentsData.length > 0) {
-            let separatorRow: { [key: string]: any } = {};
-            headers.forEach(header => {
-                separatorRow[header] = ""; // Dejar en blanco todas las celdas de la fila negra
-            });
-            formattedData.splice(agentsData.length, 0, separatorRow);
-        }
-
-        // Crear la hoja de cálculo
-        const wsAgents = utils.json_to_sheet(formattedData, { header: headers });
-
-        // Aplicar estilos a los encabezados
-        headers.forEach((_header: string, index: number) => {
-            const cellAddress = utils.encode_cell({ r: 0, c: index }); // Celda en la primera fila (0) y columna correspondiente (index)
-            if (!wsAgents[cellAddress]) wsAgents[cellAddress] = {}; // Asegúrate de que la celda existe
-            wsAgents[cellAddress].s = {
-                fill: {
-                    fgColor: { rgb: "000000" } // Fondo negro
-                },
-                font: {
-                    color: { rgb: "FFFFFF" }, // Texto blanco
-                    bold: true // Texto en negrita para mayor claridad
-                },
-                alignment: {
-                    horizontal: 'center', // Alineación horizontal
-                    vertical: 'center' // Alineación vertical
-                }
-            };
-        });
-
-        // Ajustar el tamaño de las columnas al contenido
-        const columnWidths = headers.map((header: string) => ({ wch: header.length + 5 })); // Ajusta según sea necesario
-        wsAgents['!cols'] = columnWidths;
-
-        // Alinear el contenido de las filas a la izquierda
-        for (let R = 1; R <= formattedData.length; R++) {
-            for (let C = 0; C < headers.length; C++) {
-                const cellAddress = utils.encode_cell({ r: R, c: C });
-                if (wsAgents[cellAddress]) {
-                    if (!wsAgents[cellAddress].s) wsAgents[cellAddress].s = {};
-                    wsAgents[cellAddress].s.alignment = {
-                        horizontal: 'left', // Alineación horizontal a la izquierda
-                        vertical: 'center' // Alineación vertical al centro
-                    };
-                    // Aplicar el fondo negro a la fila separadora
-                    if (R === agentsData.length + 1) {
-                        wsAgents[cellAddress].s.fill = {
-                            fgColor: { rgb: "424242" } // Fondo negro
-                        };
-                    }
-                }
-            }
-        }
-
-        // Crear un libro de trabajo
-        const wb = utils.book_new();
-        utils.book_append_sheet(wb, wsAgents, 'Report');
-
-        // Guardar el archivo Excel
-        writeFile(wb, 'HeadCount_per_Client_' + currentMonth + '_' + currentDate + '.xlsx');
-    };
-
-
-
-    console.log('estos son los dias, ', days)
-    console.log('estos son los dias GENERALES, ', daysw)
-
-    const totalSummary: string[] = dataTotal.map((item) => item.total);
-
-    console.log("este es el dato que ocupo", dataTotal)
-
-
-    console.log('esta es mi ruta', dataw);
-
     const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
@@ -476,345 +212,565 @@ const Payment: FC<any> = function ({ sharedState }: any) {
     }, [sharedState]);
 
 
+
     return (
         <div>
-            <div className=" text-xl font-bold leading-none text-gray-900 dark:text-white pe-1 mt-12 ml-8 md-12">
-                <span className=" md-8">SYSTEM</span>
+            <div className="block items-center justify-between border-b rounded-tl-2xl rounded-tr-2xl border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-700 sm:flex"
+                style={{
+                    backgroundImage: `linear-gradient(rgba(76, 175, 80, 1.7), rgba(139, 195, 74, 0.7)),
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 200 210'%3E%3Cg transform='rotate(120 90 90)'%3E%3Crect x='2' y='80' width='90' height='60' fill='%238BC34A'/%3E%3Crect x='60' y='30' width='70' height='40' fill='%239CCC65'/%3E%3C/g%3E%3C/svg%3E")`,
+                    backgroundSize: '350px 250px', // Adjust the size of the SVG pattern
+                    backgroundRepeat: 'repeat', // Ensure the pattern repeats across the strip
+                    backgroundPosition: 'center',
+                    position: 'relative',
+                    height: '120px', // Set the height of the strip
+                    color: 'white', // Ensure text is visible against the dark background
+                }}
+
+            >               <div className="mb-1 w-full">
+                    <div className="mb-4">
+                        <h1 style={{ zoom: 0.90 }} className="text-xl ml-4 mt-4 font-semibold text-white-900 dark:text-white sm:text-2xl">
+                            List of banks
+                        </h1>
+                    </div>
+                    <div className="sm:flex" style={{ zoom: 0.90 }}>
+                        <div className="mb-3 ml-4 hidden items-center dark:divide-white-700 sm:mb-0 sm:flex sm:divide-x sm:divide-gray-100">
+
+
+                        </div>
+
+                        <div className="ml-auto mr-4 flex items-center space-x-2 sm:space-x-3">
+                            <AddTaskModal
+                                sharedState={sharedState}
+                                 />
+                            <ExportModal
+                                data={data} />
+                        </div>
+
+                    </div>
+                </div>
             </div>
-            <Accordion className="mt-12">
-                <Accordion.Panel className="mt-12">
-                    <Accordion.Title onClick={() => handleSetActiveLink('uno')}>
-                        <table className="w-full">
-                            <tr>
-                                <td className="text-left">
-                                    <div className="flex justify-center items-center mb-2">
-                                        <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white pe-1">General Report</h5>
-                                        <h1 className="leading-none text-gray-900 dark:text-white pe-1">by Category</h1>
-                                    </div>
-                                </td>
-                                <td className="text-right">
-                                    <button onClick={exportToGraphis} className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full right-0 top-10">
-                                        <HiTable className="h-7 w-7" />
-                                    </button>
-                                </td>
-                            </tr>
-                        </table>
-                    </Accordion.Title>
-                    <Accordion.Content hidden={activeLink !== 'uno'}>
-                        <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
-                            <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
-                                <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                    {['asset', 'total_qty', ...dataGraphis.header.filter(header => header !== 'total_qty' && header !== 'asset')].map((headerItem, index) => (
-                                        <th key={index} scope="col" className="py-3 px-6">
-                                            {headerItem}
-                                        </th>
-                                    ))}
-                                </Table.Head>
-                                <Table.Body>
-                                    {dataGraphis.rows.map((row, rowIndex) => (
-                                        <>
-                                            <Table.Row key={rowIndex} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" onClick={() => handleRowClick(rowIndex)}>
-                                                {['asset', 'total_qty', ...dataGraphis.header.filter(header => header !== 'total_qty' && header !== 'asset')].map((headerItem, colIndex) => (
-                                                    <Table.Cell key={colIndex} className="py-4 px-6 font-semibold">
-                                                        {headerItem === 'asset' ? (
-                                                            <a
-                                                                className="bg-white text-gray-800 h-4 pt-0 dark:bg-gray-800 dark:text-white inline-block px-3 py-1 rounded"
-                                                                href={`/Inventory?filter=${(row as any)[headerItem]}`}
-                                                            >
-                                                                {(row as any)[headerItem]}
-                                                            </a>
-                                                        ) : (
-                                                            (row as any)[headerItem]
-                                                        )}
-                                                    </Table.Cell>
-                                                ))}
-                                            </Table.Row>
-                                            {expandedRow === rowIndex && (
-                                                <Table.Row className="bg-gray-100 dark:bg-gray-900">
-                                                    <Table.Cell colSpan={dataGraphis.header.length}>
-                                                        <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
-                                                            <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
-                                                                <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                                                    {/* Replace this with headers for the nested table */}
-                                                                    <th className="py-3 px-6">Nested Header 1</th>
-                                                                    <th className="py-3 px-6">Nested Header 2</th>
-                                                                </Table.Head>
-                                                                <Table.Body>
-                                                                    {/* Replace this with rows for the nested table */}
-                                                                    <Table.Row className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                                                        <Table.Cell className="py-4 px-6">Nested Data 1</Table.Cell>
-                                                                        <Table.Cell className="py-4 px-6">Nested Data 2</Table.Cell>
-                                                                    </Table.Row>
-                                                                </Table.Body>
-                                                            </Table>
-                                                        </div>
-                                                    </Table.Cell>
-                                                </Table.Row>
-                                            )}
-                                        </>
-                                    ))}
-                                </Table.Body>
-                            </Table>
-                        </div>
-                    </Accordion.Content>
-                </Accordion.Panel>
-                <Accordion.Panel>
-                    <Accordion.Title onClick={() => handleSetActiveLink('dos')}>
-                        <table className="w-full">
-                            <tr>
-                                <td className="text-left">
-                                    <div className="flex justify-center items-center mb-2">
-                                        <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white pe-1">Report</h5>
-                                        <h1 className=" leading-none text-gray-900 dark:text-white pe-1">Per Client</h1>
-                                    </div>
-                                </td>
-                                <td className="text-right">
-                                    {/* <Button onClick={exportToExcelSegment} className="mb-2 bg-primary-500 ml-2 text-gray-500  dark:bg-gray-800 dark:text-white dark:hover:text-white font-bold">
-                                    <HiTable /> excel
-                                </Button> */}
-
-                                    <button onClick={exportToExcelSegment} className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full  right-0 top-10">
-                                        <HiTable className="h-7 w-7" />
-                                    </button>
-                                </td>
-                            </tr>
-                        </table>
 
 
-                    </Accordion.Title>
-                    <Accordion.Content hidden={activeLink !== 'dos'}>
-
-                        <div className="grid grid-cols-1 gap-4 pt-2 mb-8 ">
-                            <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
-                                <div>
-                                    <div className="flex justify-center items-center mb-4">
-                                        <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white pe-1">Agents</h5>
-                                        <h1 className=" leading-none text-gray-900 dark:text-white pe-1"> Detail</h1>
-                                    </div>
-                                    <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
-                                        <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 ">
-                                            <th scope="col" className="py-3 px-6">Agents</th>
-                                            <th scope="col" className="py-3 px-6">Brand</th>
-                                            <th scope="col" className="py-3 px-6">Category</th>
-                                            <th scope="col" className="py-3 px-6">Vendor</th>
-                                            {days.map((day: boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | Key | null | undefined) => (
-                                                <th >{day}</th>
-                                            ))}
-                                            <th scope="col" className="py-3 px-6">Total</th>
-                                        </Table.Head>
-                                        <Table.Body>
-
-                                            {data.filter((row: { [x: string]: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; asset: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; brand: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; category: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; vendor: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }, _index: Key | null | undefined) => row.asset === "Agents").map((row: { [x: string]: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; asset: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; brand: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; category: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; vendor: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; }, index: Key | null | undefined) => (
-                                                <Table.Row key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                                    <td scope="col" className="py-3 px-6">{row.asset}</td>
-                                                    <td scope="col" className="py-3 px-6">{row.brand}</td>
-                                                    <td scope="col" className="py-3 px-6 bg-gray-200 font-semibold dark:bg-gray-900 ">{row.category}</td>
-                                                    <td scope="col" className="py-3 px-6">{row.vendor}</td>
-                                                    {/* {days.map((day: Key | null | any) => (
-                                                    <td key={day}>{row[day]}</td>
-                                                ))} */}
-
-                                                    {days.map((day: Key | null | any) => {
-                                                        const dayNumber = parseInt(day, 10); // Asumiendo que 'day' es una cadena representando el día
-                                                        if (dayNumber > currentDay) {
-                                                            return <td key={day}></td>;
-                                                        } else {
-                                                            return <td key={day}>{row[day]}</td>;
-                                                        }
-                                                    })}
-                                                    <td scope="col" className="py-3 px-6"><Badge>{row["total"]}</Badge></td>
-                                                </Table.Row>
-                                            ))}
-                                        </Table.Body>
-                                    </Table>
-
-
-                                    <div className="flex justify-center items-center mb-4 mt-8">
-                                        <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white pe-1">IT INVENTORY</h5>
-                                        <h1 className=" leading-none text-gray-900 dark:text-white pe-1"> DETAILS</h1>
-                                    </div>
-
-                                    <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
-                                        <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 ">
-                                            <th scope="col" className="py-3 px-6">ASSETS</th>
-                                            {daysw.map((day: boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | Key | null | undefined) => (
-                                                <th >{day}</th>
-                                            ))}
-                                            <th scope="col" className="py-2 px-3">STOCK</th>
-                                            <th scope="col" className="py-2 px-3">REPAIR</th>
-                                            <th scope="col" className="py-2 px-3">DAMAGED</th>
-                                            <th scope="col" className="py-2 px-3">DISMISSED</th>
-                                            <th scope="col" className="py-2 px-3">TOTAL</th>
-
-                                        </Table.Head>
-                                        <Table.Body>
-                                            {dataw
-                                                .filter((row: { [x: string]: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; asset: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; brand: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; category: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; vendor: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }) =>
-                                                    typeof row.asset === 'string' && !row.asset.includes("Agents")
-                                                )
-                                                .map((row: any, index: any) => (
-                                                    <Table.Row key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                                        <td scope="col" className="py-3 px-6">{row.asset}</td>
-                                                        {/* {daysw.map((day: Key | null | any) => (
-                                                        <td key={day}>{row[day]}</td>
-                                                    ))} */}
-                                                        {daysw.map((day: Key | null | any) => {
-                                                            const dayNumber = parseInt(day, 10); // Asumiendo que 'day' es una cadena representando el día
-                                                            if (dayNumber > currentDay) {
-                                                                return <td key={day}></td>;
-                                                            } else {
-                                                                return <td key={day}>{row[day]}</td>;
-                                                            }
-                                                        })}
-                                                        <td scope="col" className="py-3 px-3">{row["STOCK"]}</td>
-                                                        <td scope="col" className="py-3 px-3">{row["Repair"]}</td>
-                                                        <td scope="col" className="py-3 px-3">{row["Damaged"]}</td>
-                                                        <td scope="col" className="py-3 px-3">{row["DISMISSED"]}</td>
-                                                        <td scope="col" className="py-3 px-3"><Badge>{row["total"]}</Badge></td>
-                                                    </Table.Row>
-                                                ))}
-
-
-                                        </Table.Body>
-                                    </Table>
-                                </div>
-
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <tr>
+                        <td className="text-center">
+                            <div className="flex justify-center items-center mb-2">
                             </div>
-                        </div>
-                    </Accordion.Content>
-                </Accordion.Panel>
-                <Accordion.Panel>
-                    <Accordion.Title onClick={() => handleSetActiveLink('tres')}>
-                        <table className="w-full">
-                            <tr>
-                                <td className="text-left">
-                                    <div className="flex justify-center items-center mb-2">
-                                        <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white pe-1">Category</h5>
-                                        <h1 className=" leading-none text-gray-900 dark:text-white pe-1">Monthly Report</h1>
-                                    </div>
-                                </td>
-                                <td className="text-right">
+                        </td>
+                        {/* <td className="text-right">
+                            <button onClick={exportToGraphis} className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full right-0 top-10">
+                                <HiTable className="h-7 w-7" />
+                            </button>
+                        </td> */}
+                    </tr>
+                </table>
 
-                                    <button onClick={exportToExcel} className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full  right-0 top-10">
-                                        <HiTable className="h-7 w-7" />
-                                    </button>
-                                    {/* <Button onClick={exportToExcel} className="mb-2 ml-2 bg-primary-500 text-gray-500  dark:bg-gray-800 dark:text-white dark:hover:text-white">
-                                    <HiTable className="text-xl" />excel
-                                </Button> */}
+                <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
+                    <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
+                        <Table.Head >
+                            {['asset', 'total_qty', ...dataGraphis.header.filter(header => header !== 'total_qty' && header !== 'asset')].map((headerItem, index) => (
+                                <Table.HeadCell key={index} scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
+                                    {headerItem}
+                                </Table.HeadCell>
+                            ))}
+                        </Table.Head>
+                        <Table.Body>
+                            {dataGraphis.rows.map((row, rowIndex) => (
+                                <>
+                                    <Table.Row key={rowIndex} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" onClick={() => handleRowClick(rowIndex)}>
+                                        {['asset', 'total_qty', ...dataGraphis.header.filter(header => header !== 'total_qty' && header !== 'asset')].map((headerItem, colIndex) => (
+                                            <Table.Cell key={colIndex} className="py-4 px-6 font-semibold">
+                                                {headerItem === 'asset' ? (
+                                                    <>
+                                                        <a
+                                                            className="bg-white text-gray-800 h-4 pt-0 dark:bg-gray-800 dark:text-white inline-block px-3 py-1 rounded"
+                                                            href={`/Inventory?filter=${(row as any)[headerItem]}`}
+                                                        >
+                                                            {(row as any)[headerItem]}
+                                                        </a>
+                                                        <button onClick={exportToGraphis} className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full right-0 top-10">
+                                                            <HiTable className="h-7 w-7" />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    (row as any)[headerItem]
 
-                                </td>
-
-                            </tr>
-                        </table>
-
-
-                    </Accordion.Title>
-                    <Accordion.Content hidden={activeLink !== 'tres'}>
-                        {/* <Accordion.Content> */}
-                        <div className="grid grid-cols-1 gap-4 pt-2 mb-8 ">
-                            <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
-                                <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
-                                    <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
-
-                                        <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 ">
-                                            <th scope="col" className="py-3 px-6">Asset</th>
-                                            <th scope="col" className="py-3 px-6">Brand</th>
-                                            <th scope="col" className="py-3 px-6">Category</th>
-                                            <th scope="col" className="py-3 px-6">Vendor</th>
-                                            {days.map((day: boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | Key | null | undefined) => (
-                                                <th >{day}</th>
-                                            ))}
-                                            <th scope="col" className="py-3 px-6">TOTAL</th>
-
-
-                                        </Table.Head>
-                                        <Table.Body>
-
-
-                                            <div className="flex justify-left items-center mb-4 mt-4 ml-8">
-                                                <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white pe-1">AGENTS</h5>
-                                                <h1 className=" leading-none text-gray-900 dark:text-white pe-1">  DETAILS</h1>
-                                            </div>
-                                            {data.filter((row: { [x: string]: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; asset: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; brand: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; category: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; vendor: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }) => row.asset === "Agents").map((row: { [x: string]: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; asset: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; brand: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; category: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; vendor: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; }, index: Key | null | undefined) => (
-                                                <Table.Row key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                                    <td scope="col" className="py-3 px-6">{row.asset}</td>
-                                                    <td scope="col" className="py-3 px-6">{row.brand}</td>
-                                                    <td scope="col" className="py-3 px-6 bg-gray-200 font-semibold dark:bg-gray-900 ">{row.category}</td>
-                                                    <td scope="col" className="py-3 px-6">{row.vendor}</td>
-
-                                                    {/* {days.map((day: Key | null | any) => (
-                                                    <td key={day}>{row[day]}</td>
-                                                ))} */}
-
-                                                    {days.map((day: Key | null | any) => {
-                                                        const dayNumber = parseInt(day, 10); // Asumiendo que 'day' es una cadena representando el día
-                                                        if (dayNumber > currentDay) {
-                                                            return <td key={day}></td>;
-                                                        } else {
-                                                            return <td key={day}>{row[day]}</td>;
-                                                        }
-                                                    })}
-                                                    <td scope="col" className="py-3 px-6"><Badge>{row["total"]}</Badge></td>
-                                                </Table.Row>
-                                            ))}
-
-                                            <div className="flex justify-left  ml-8 items-center mb-4 mt-4 text-gray-900 border-full">
-
-
-                                                <h5 className="text-xl font-bold leading-none text-white-900 dark:text-white pe-1 border-full">IT INVENTORY</h5>
-                                                <h1 className=" leading-none text-white-900 dark:text-white pe-1">  DETAILS</h1>
-
-                                            </div>
-
-
-                                            {data.filter((row: { [x: string]: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; asset: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; brand: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; category: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; vendor: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }, _index: Key | null | undefined) => row.asset !== "Agents").map((row: { [x: string]: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; asset: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; brand: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; category: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; vendor: string | number | boolean | ReactFragment | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | null | undefined; }, index: Key | null | undefined) => (
-                                                <Table.Row key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                                    <td scope="col" className="py-3 px-6">{row.asset}</td>
-                                                    <td scope="col" className="py-3 px-6">{row.brand}</td>
-                                                    <td scope="col" className="py-3 px-6 bg-gray-200 font-semibold dark:bg-gray-900 ">{row.category}</td>
-                                                    <td scope="col" className="py-3 px-6">{row.vendor}</td>
-                                                    {/* {days.map((day: Key | null | any) => (
-                                                    <td key={day}>{row[day]}</td>
-                                                ))} */}
-                                                    {days.map((day: Key | null | any) => {
-                                                        const dayNumber = parseInt(day, 10); // Asumiendo que 'day' es una cadena representando el día
-                                                        if (dayNumber > currentDay) {
-                                                            return <td key={day}></td>;
-                                                        } else {
-                                                            return <td key={day}>{row[day]}</td>;
-                                                        }
-                                                    })}
-                                                    <td scope="col" className="py-3 px-6"><Badge>{row["total"]}</Badge></td>
-                                                </Table.Row>
-                                            ))}
-                                            {/* {data.map((row: { [x: string]: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; asset: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; brand: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; category: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; vendor: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }, index: Key | null | undefined) => (
-                                            <Table.Row key={index}>
-                                                <td scope="col" className="py-3 px-6">{row.asset}</td>
-                                                <td scope="col" className="py-3 px-6">{row.brand}</td>
-                                                <td scope="col" className="py-3 px-6">{row.category}</td>
-                                                <td scope="col" className="py-3 px-6">{row.vendor}</td>
-                                                {days.map((day: Key | null | any) => (
-                                                    <td key={day}>{row[day]}</td>
-                                                ))}
-                                            </Table.Row>
-                                        ))} */}
-                                        </Table.Body>
-                                    </Table>
-                                </div>
-
-                            </div>
-                        </div>
-
-                    </Accordion.Content>
-                </Accordion.Panel>
-            </Accordion>
-
-
+                                                )}
+                                            </Table.Cell>
+                                        ))}
+                                    </Table.Row>
+                                    {expandedRow === rowIndex && (
+                                        <Table.Row className="bg-gray-100 dark:bg-gray-900">
+                                            <Table.Cell colSpan={dataGraphis.header.length}>
+                                                <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
+                                                    <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
+                                                        <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                                            {/* Replace this with headers for the nested table */}
+                                                            <th className="py-3 px-6">Nested Header 1</th>
+                                                            <th className="py-3 px-6">Nested Header 2</th>
+                                                        </Table.Head>
+                                                        <Table.Body>
+                                                            {/* Replace this with rows for the nested table */}
+                                                            <Table.Row className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                                                <Table.Cell className="py-4 px-6">Nested Data 1</Table.Cell>
+                                                                <Table.Cell className="py-4 px-6">Nested Data 2</Table.Cell>
+                                                            </Table.Row>
+                                                        </Table.Body>
+                                                    </Table>
+                                                </div>
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    )}
+                                </>
+                            ))}
+                        </Table.Body>
+                    </Table>
+                </div>
+            </div>
 
         </div>
 
     );
 };
+
+
+
+
+
+const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any) {
+    const [isOpen, setOpen] = useState(false);
+    const [supBadge, setSupBadge] = useState<any>('');
+    const [result, setResult] = useState<any>([]);
+    const [supervisorName, setSupervisorName] = useState('');
+
+    const [name, setName] = useState('');
+    const [statusActive, setStatusActive] = useState('');
+
+    // Bank Check Payment
+    const [bankCheckPayment, setBankCheckPayment] = useState('');
+    // Bank  account n
+    const [bankAccountNumber, setBankAccountNumber] = useState('');
+
+
+
+    const [methodPayment, setMethodCategory] = useState('');
+    // const [idCategory, setIdCategory] = useState('');
+
+    console.log('estas son la categorias seleccionadas', methodPayment)
+
+
+    const urlHired = `https://bn.glassmountainbpo.com:8080/api/hired/`;
+
+    const handleTrack = () => {
+        if (supBadge.length !== 0) {
+            axios.get(urlHired + supBadge)
+                .then((response => {
+                    setResult(response.data);
+                    const data = response.data;
+                    if (data.first_name !== undefined) {
+                        setSupervisorName(data.first_name + " " + data.second_name + " " + data.first_last_name + " " + data.second_last_name);
+                    } else {
+                        setSupervisorName('');
+                    }
+                }));
+        }
+    };
+
+    const handleKeyPress = (e: { key: string; }) => {
+        if (e.key === "Enter") {
+            handleTrack();
+        }
+    };
+
+
+    const resetFields = () => {
+        setName('');
+        setSupBadge('');
+        setStatusActive('');
+        setSupervisorName('');
+    };
+
+    console.log(result, supervisorName)
+
+
+
+
+    const url2 = `https://bn.glassmountainbpo.com:8080/inventory/addBank`;
+    const handleSubmit = async (e: React.FormEvent) => {
+        if (!name) {
+            alert('Enter a valid category name')
+        } else if (!statusActive) {
+            alert('Enter a valid status!')
+        } else {
+            e.preventDefault()
+            try {
+                const response = await axios.post(url2, {
+                    name,
+                    statusActive,
+                    created_user,
+                    methodPayment,
+                    bankCheckPayment,
+                    bankAccountNumber,
+                    info
+                })
+                if (response.status == 200) {
+                    const responseData = response.data;
+                    updateSharedState(!sharedState);
+
+                    if (responseData.message === "ok") {
+                        setOpen(false);
+                        resetFields();
+                        alert('Brand created successfully!')
+                    } else {
+                        console.log("Fatal Error");
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+                setOpen(false)
+            }
+        }
+    }
+
+
+    // auditoria 
+
+    interface BrowserInfo {
+        browser: string;
+        device: string;
+        os: string;
+        location: string; // Lugar que será obtenido después
+    }
+
+
+    const [info, setInfo] = useState<BrowserInfo>({
+        browser: '',
+        device: '',
+        os: '',
+        location: 'Unknown',
+    });
+
+    useEffect(() => {
+        // Obtiene información del navegador
+        const parser = new UAParser();
+        const browserName = parser.getBrowser().name || 'Unknown';
+        const deviceType = parser.getDevice().type || 'Unknown';
+        const osName = parser.getOS().name || 'Unknown';
+
+        // Actualiza información del navegador y dispositivo
+        setInfo({
+            ...info,
+            browser: browserName,
+            device: deviceType,
+            os: osName,
+        });
+
+        // Obtiene la ubicación geográfica (si el usuario lo permite)
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    setInfo((prevInfo) => ({
+                        ...prevInfo,
+                        location: `Lat: ${lat}, Lon: ${lon}`,
+                    }));
+                },
+                (error) => {
+                    console.error('Error obteniendo ubicación:', error);
+                }
+            );
+        }
+    }, []); // Solo se ejecuta una vez al montar el componente
+
+    console.log('XXXXXXXXXXXXXXXXXXXXXX info: ', info);
+
+    const [dataInternal, setDataInternal] = useState([] as any[]);
+
+    useEffect(() => {
+        axios.get('https://bn.glassmountainbpo.com:8080/inventory/listCategory')
+            .then(res => {
+                // If userLevel is not 2, set data as is
+                const filteredData = res.data.filter((item: { active: number; }) => item.active == 1);
+                setDataInternal(filteredData);
+
+            })
+    }, [created_user]); // Add userLevel and created_user to the dependency array
+
+
+
+
+    useEffect(() => {
+        if (methodPayment === 'BANK CHECK') {
+            setBankCheckPayment('');
+        } else if (methodPayment === 'ACCOUNT BANK NUMBER') {
+            setBankAccountNumber('');
+        } else if (methodPayment === '') {
+            setBankCheckPayment('');
+            setBankAccountNumber('');
+        }
+    }, [methodPayment]);
+
+
+    return (
+        <>
+            <Button color="primary" onClick={() => { setOpen(true) }}>
+                <div className="flex items-center gap-x-3">
+                    <HiPlus className="text-xl" />
+                    Add Bank
+                </div>
+            </Button>
+            <Modal onClose={() => setOpen(false)} show={isOpen}>
+                <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
+                    <strong>Add new bank!</strong>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <div>
+                            <Label htmlFor="name">Name</Label>
+                            <div className="mt-1">
+                                <TextInput
+                                    id="name"
+                                    name="name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    onKeyDown={(e) => handleKeyPress(e)}
+                                >
+
+                                </TextInput>
+
+                            </div>
+                        </div>
+                        <div>
+
+                            <Label htmlFor="vendor">Method Payment</Label>
+                            <div className="mt-1">
+                                <Select onChange={(e) => {
+                                    // const selectedIndex = e.target.selectedIndex;
+                                    const selectedMethod = e.target.value;
+                                    setMethodCategory(selectedMethod);
+                                    // setIdCategory(dataInternal[selectedIndex].id);
+                                }}>
+                                  
+                                    <option value="">SELECTED</option>
+                                    <option value="BANK CHECK">BANK CHECK</option>
+                                    <option value="ACCOUNT BANK NUMBER">ACCOUNT BANK NUMBER</option>
+
+                                </Select>
+
+                            </div>
+
+                        </div>
+                        <div>
+                            <Label htmlFor="check">Bank Check Payment</Label>
+                            <div className="mt-1">
+                                <TextInput
+                                    id="check"
+                                    name="check"
+                                    value={bankCheckPayment}
+                                    onChange={(e) => {
+                                        if (methodPayment !== 'ACCOUNT BANK NUMBER' && methodPayment !== '') {
+                                            setBankCheckPayment('BANK CHECK');
+                                            setBankAccountNumber('');
+                                        }
+                                    }}
+                                    readOnly={methodPayment === 'ACCOUNT BANK NUMBER' || methodPayment === ''}
+                                    disabled={methodPayment === 'ACCOUNT BANK NUMBER' || methodPayment === ''}
+                                >
+                                </TextInput>
+                            </div>
+                        </div>
+                        <div>
+                            <Label htmlFor="bank">Bank Account Number</Label>
+                            <div className="mt-1">
+                                <TextInput
+                                    id="bank"
+                                    name="bank"
+                                    value={bankAccountNumber}
+                                    onChange={(e) => {
+                                        if (methodPayment !== 'BANK CHECK' && methodPayment !== '') {
+                                            setBankAccountNumber(e.target.value);
+                                            setBankCheckPayment('');
+                                        }
+                                    }}
+                                    readOnly={methodPayment === 'BANK CHECK' || methodPayment === ''}
+                                    disabled={methodPayment === 'BANK CHECK' || methodPayment === ''}
+                                >
+                                </TextInput>
+                            </div>
+                        </div>
+                        <div>
+
+                            <Label htmlFor="vendor">Status</Label>
+                            <div className="mt-1">
+                                <Select
+                                    id="vendor"
+                                    name="vendor"
+                                    value={statusActive}
+                                    onChange={(e) => setStatusActive(e.target.value)}
+                                >
+                                    <option value={""}>Selected</option>
+                                    <option value={"1"}>Active</option>
+                                    <option value={"0"}>Inactive</option>
+                                </Select>
+                            </div>
+
+                        </div>
+                        <div>
+                            <div>
+                                <Label htmlFor="period">Admin User</Label>
+                                <div className="mt-1">
+                                    <TextInput
+                                        id="supBadge"
+                                        name="supBadge"
+                                        placeholder="3814"
+                                        value={created_user}
+                                        onChange={(e) => setSupBadge(e.target.value)}
+                                        onKeyDown={(e) => handleKeyPress(e)}
+                                        required
+                                        readOnly
+
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        color="primary"
+                        onClick={(e) => { handleSubmit(e) }}>
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Modal >
+        </>
+    );
+};
+
+
+
+
+
+const ExportModal: FC<any> = function (rawData) {
+    const [isOpen, setOpen] = useState(false);
+    const data = rawData.data;
+
+
+    const convertToCSV = (data: any) => {
+        const csvRows = [];
+        const allHeaders = Object.keys(data[0]);
+        const desiredOrder = ['id', 'name', 'method', 'bank_account', 'bank_check', 'active', 'date_created'];
+
+        const headers = desiredOrder.filter(header => allHeaders.includes(header));
+
+        // Modificar las cabeceras según sea necesario
+        const modifiedHeaders = headers.map(header => {
+            if (header === 'date_created') {
+                return header.toUpperCase(); // Convertir a mayúsculas
+            } else if (header === 'bank_account') {
+                return 'BANK ACCOUNT'; // Cambiar el nombre de la cabecera
+            } else if (header === 'bank_check') {
+                return 'BANK CHECK'; // Cambiar el nombre de la cabecera
+            } else if (header === 'method') {
+                return 'METHOD'; // Cambiar el nombre de la cabecera
+            } else {
+                return header.toUpperCase(); // Convertir a mayúsculas
+            }
+        });
+
+        csvRows.push(modifiedHeaders.join(','));
+
+        for (const row of data) {
+            const values = headers.map(header => {
+                if (header === 'date_created') {
+                    // Formatear las fechas como dd/mm/yyyy
+                    const date = new Date(row[header]);
+                    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                } else if (header === 'name') {
+                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
+                    return row[header].split(',').join(' - ');
+                } else {
+                    return row[header];
+                }
+            });
+            csvRows.push(values.join(','));
+        }
+
+        return csvRows.join('\n');
+    };
+
+
+
+
+    // Function to export data to CSV and prompt download
+    const exportToCSV = () => {
+        console.log(data);
+
+        const csvContent = convertToCSV(data);
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' }); // Añadir BOM para Excel
+
+        // const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'banksReports.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setOpen(false);
+    };
+
+    // Function to convert an array to an XLS file
+    const exportToXLS = () => {
+        console.log(data);
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+        XLSX.writeFile(wb, 'CardsReports.xlsx');
+        setOpen(false);
+    };
+
+    return (
+        <>
+            <Button onClick={() => setOpen(true)} className="bg-indigo-800 hover:bg-indigo-700 dark:bg-indigo-900 dark:hover-bg-indigo-500" >
+                <div className="flex items-center gap-x-3 ">
+                    <HiDocumentDownload className="text-xl" />
+                    <span>Export</span>
+                </div>
+            </Button>
+            <Modal onClose={() => setOpen(false)} show={isOpen} size="md">
+                <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
+                    <strong>Export users</strong>
+                </Modal.Header>
+                <Modal.Body className="flex flex-col items-center gap-y-6 text-center">
+                    <div className="flex items-center gap-x-3">
+                        <div>
+                            <Button onClick={exportToCSV} color="light">
+                                <div className="flex items-center gap-x-3">
+                                    <FiletypeCsv className="text-xl" />
+                                    <span>Export CSV</span>
+                                </div>
+                            </Button>
+                        </div>
+                        <div>
+                            <Button onClick={exportToXLS} color="light">
+                                <div className="flex items-center gap-x-3">
+                                    <FiletypeXlsx className="text-xl" />
+                                    <span>Export XLSX</span>
+                                </div>
+                            </Button>
+                        </div>
+                    </div>
+                </Modal.Body>
+
+            </Modal>
+        </>
+    )
+
+}
 
 
 

@@ -425,9 +425,9 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
 
     const [methodPayment, setMethodCategory] = useState('');
-    const [idCategory, setIdCategory] = useState('');
+    // const [idCategory, setIdCategory] = useState('');
 
-    console.log('estas son la categorias seleccionadas', methodPayment, idCategory)
+    console.log('estas son la categorias seleccionadas', methodPayment)
 
 
     const urlHired = `https://bn.glassmountainbpo.com:8080/api/hired/`;
@@ -466,7 +466,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
 
 
-    const url2 = `https://bn.glassmountainbpo.com:8080/inventory/addBrand`;
+    const url2 = `https://bn.glassmountainbpo.com:8080/inventory/addBank`;
     const handleSubmit = async (e: React.FormEvent) => {
         if (!name) {
             alert('Enter a valid category name')
@@ -479,15 +479,16 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                     name,
                     statusActive,
                     created_user,
-                    idCategory,
                     methodPayment,
+                    bankCheckPayment,
+                    bankAccountNumber,
                     info
                 })
                 if (response.status == 200) {
                     const responseData = response.data;
                     updateSharedState(!sharedState);
 
-                    if (responseData.message === "Brand created") {
+                    if (responseData.message === "ok") {
                         setOpen(false);
                         resetFields();
                         alert('Brand created successfully!')
@@ -616,10 +617,10 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                             <Label htmlFor="vendor">Method Payment</Label>
                             <div className="mt-1">
                                 <Select onChange={(e) => {
-                                    const selectedIndex = e.target.selectedIndex;
+                                    // const selectedIndex = e.target.selectedIndex;
                                     const selectedMethod = e.target.value;
                                     setMethodCategory(selectedMethod);
-                                    setIdCategory(dataInternal[selectedIndex].id);
+                                    // setIdCategory(dataInternal[selectedIndex].id);
                                 }}>
                                     {/* {
                                         dataInternal
@@ -651,7 +652,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                                     value={bankCheckPayment}
                                     onChange={(e) => {
                                         if (methodPayment !== 'ACCOUNT BANK NUMBER' && methodPayment !== '') {
-                                            setBankCheckPayment(e.target.value);
+                                            setBankCheckPayment('BANK CHECK');
                                             setBankAccountNumber('');
                                         }
                                     }}
@@ -733,22 +734,26 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 const EditUserModal: FC<any> = function ({ id, active, name, sharedState, updateSharedState }: any) {
     const [isOpen, setOpen] = useState(false);
     const [status, setStatus] = useState(active);
-    const [nameCategory, setNameCategory] = useState(name);
+    const [nameBank, setNameBank] = useState(name);
 
     useEffect(() => {
         setStatus(active);
     }, [active]);
 
     useEffect(() => {
-        setNameCategory(name);
+        setNameBank(name);
     }, [name]);
 
     const handleSubmit = async (e: React.FormEvent) => {
+
+        if (status == ''){
+            alert('Select a state')
+        }
         e.preventDefault()
         try {
-            const response = await axios.post('https://bn.glassmountainbpo.com:8080/inventory/editBrand', {
+            const response = await axios.post('https://bn.glassmountainbpo.com:8080/inventory/editBank', {
                 id,
-                nameCategory,
+                nameBank,
                 status,
                 created_user
             })
@@ -775,12 +780,12 @@ const EditUserModal: FC<any> = function ({ id, active, name, sharedState, update
             </Button>
             <Modal onClose={() => setOpen(false)} show={isOpen}>
                 <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-                    <strong>Edit Brand</strong>
+                    <strong>Edit Bank</strong>
                 </Modal.Header>
                 <Modal.Body>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                         <div>
-                            <Label htmlFor="id">ID Category</Label>
+                            <Label htmlFor="id">ID Bank</Label>
                             <div className="mt-1">
                                 <TextInput
                                     id="id"
@@ -791,11 +796,11 @@ const EditUserModal: FC<any> = function ({ id, active, name, sharedState, update
                             </div>
                         </div>
                         <div>
-                            <Label htmlFor="taskName">Name Category</Label>
+                            <Label htmlFor="taskName">Name Bank</Label>
                             <div className="mt-1">
                                 <TextInput
                                     value={name}
-                                    onChange={e => { setNameCategory(e.target.value) }}
+                                    onChange={e => { setNameBank(e.target.value) }}
 
                                 />
                             </div>
