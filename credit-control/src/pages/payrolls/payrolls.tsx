@@ -285,7 +285,7 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
                                             <Table.Cell colSpan={Object.keys(row).length}>
                                                 <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
                                                     <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
-                                                        <Table.Head className="text-xs text-gray-700 uppercase bg-green-400 dark:bg-gray-700 dark:text-gray-400 ">
+                                                        <Table.Head className="text-xs text-gray-700 uppercase bg-primary-500 text-white dark:bg-gray-700 dark:text-gray-400 ">
                                                             <Table.HeadCell>Id  Payroll</Table.HeadCell>
                                                             <Table.HeadCell>Fullname</Table.HeadCell>
                                                             <Table.HeadCell>Badge</Table.HeadCell>
