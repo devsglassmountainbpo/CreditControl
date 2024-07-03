@@ -55,18 +55,13 @@ const PayrollAll: FC = function () {
 const Payroll: FC<any> = function ({ sharedState }: any) {
 
 
-
-    // const [dataGraphis, setDataGraphis] = useState([]);
-
-    // const dataGraphis: User[] = [
-    //     // Suponiendo que tus datos de usuario están aquí
-    //   ];
-
+    
     interface User {
         name: string;
         id: string;
-        // Añade otras propiedades que cada usuario pueda tener
+        header: string | number | boolean;  // Especifica los tipos permitidos
     }
+    
 
     const [dataGraphis, setDataGraphis] = useState<User[]>([]);
 
@@ -81,10 +76,7 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
 
     }, [activeLink]);
 
-    const handleSetActiveLink = (link: any) => {
-        setActiveLink((prevLink) => (prevLink === link ? '' : link));
-    };
-
+  
     console.log(activeLink)
     //filtrando datos para los reportes
 
@@ -220,8 +212,6 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
 
 
     const columnOrder = ['id', 'name', 'total_records', 'pending_count', 'Completed_count'];
-
-
 
     return (
         <div>
