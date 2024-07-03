@@ -5,7 +5,7 @@ import {
     Table,
     TextInput,
     Button,
-    Label
+    Label, Badge
 } from "flowbite-react";
 import type { FC, JSXElementConstructor, Key, ReactElement, ReactFragment, ReactPortal } from "react";
 import { useEffect, useState } from "react";
@@ -55,13 +55,13 @@ const PayrollAll: FC = function () {
 const Payroll: FC<any> = function ({ sharedState }: any) {
 
 
-    
+
     interface User {
         name: string;
         id: string;
         header: string | number | boolean;  // Especifica los tipos permitidos
     }
-    
+
 
     const [dataGraphis, setDataGraphis] = useState<User[]>([]);
 
@@ -76,7 +76,7 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
 
     }, [activeLink]);
 
-  
+
     console.log(activeLink)
     //filtrando datos para los reportes
 
@@ -301,7 +301,20 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
                                     >
                                         {columnOrder.map((key) => (
                                             <Table.Cell key={key} className="py-4 px-6 font-semibold">
-                                                {row[key]} {/* Accede al valor de cada clave según el orden definido */}
+
+                                                {typeof row[key] === 'number' && row[key] <= 30? (
+                                                    <>
+                                                        <span className="bg-green-400 text-white font-semibold px-2 py-0.5 rounded-full dark:bg-green-400 dark:text-white">
+                                                       {row[key]} 
+                                                        </span>
+                                                    </>
+
+                                                ) : (
+                                                    row[key]
+                                                )}
+
+
+
                                             </Table.Cell>
                                         ))}
                                         <Table.Cell>
@@ -324,11 +337,13 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
                                                             <Table.HeadCell>Badge</Table.HeadCell>
                                                             <Table.HeadCell>reference number</Table.HeadCell>
                                                             <Table.HeadCell>Credit Total</Table.HeadCell>
-                                                            <Table.HeadCell>total unpaid installments</Table.HeadCell>
+                                                            <Table.HeadCell>total unpaid </Table.HeadCell>
                                                             <Table.HeadCell>credit start date</Table.HeadCell>
                                                             <Table.HeadCell>credit end date</Table.HeadCell>
                                                             <Table.HeadCell>date created</Table.HeadCell>
                                                             <Table.HeadCell>Status</Table.HeadCell>
+                                                            <Table.HeadCell>Print</Table.HeadCell>
+                                                            <Table.HeadCell>Action</Table.HeadCell>
                                                         </Table.Head>
 
                                                         <Component data={row} className=' text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 hover:bg-primary-400'></Component>
@@ -358,11 +373,21 @@ const Component = function (data: any) {
     interface User {
         name: string;
         id: string;
-        // Añade otras propiedades que cada usuario pueda tener
+        id_bank: string;
+        badge: string;
+        reference_number: string;
+        active: string;
+        credit_start_date: s;
+        credit_end_date: string;
+        status_credit: string;
+        pending_payment: string;
+        credit_total: string;
+        total_payment: number;
+        date_created: string;
     }
     console.log('<<<<<<<<<<<<<<<<<<<<<<<<< este el item que recibimos', data)
-    
-    const idFilter =  data.data.id;
+
+    const idFilter = data.data.id;
     console.log('<<<<<<<<<<<<<<<<<<<<<<<<< este el item que que nos queda despues de filtrar', idFilter)
 
     const [dataGraphis, setDataGraphis] = useState<User[]>([]);
@@ -371,7 +396,7 @@ const Component = function (data: any) {
         const fetchData = async () => {
             try {
                 const [graphisRes] = await Promise.all([
-                    axios.get('https://bn.glassmountainbpo.com:8080/credit/payments'),
+                    axios.get('https://bn.glassmountainbpo.com:8080/credit/list_payrolls'),
                 ]);
 
                 setDataGraphis(graphisRes.data);
@@ -385,18 +410,54 @@ const Component = function (data: any) {
         fetchData();
     }, []);
 
-    const filteredData = dataGraphis.filter(user => user.id == idFilter);
+    const filteredData = dataGraphis.filter(user => user.id_bank == idFilter);
+
+
+    // function goodDisplay(dateString: string): string {
+    //     const date = new Date(dateString);
+    //     return new Intl.DateTimeFormat('es-ES', {
+    //         year: '2-digit',
+    //         month: '2-digit',
+    //         day: '2-digit',
+    //     }).format(date);
+    // }
+
+    function goodDisplay(dateString: string): string {
+        const date = new Date(dateString);
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Los meses son 0-11
+        const year = String(date.getUTCFullYear()).slice(-2); // Obtener los últimos 2 dígitos del año
+
+        return `${day}/${month}/${year}`;
+    }
+
+
+
+
+    // function goodDisplay(dateString: string): string {
+    //     // Asegurarse de que el formato de la cadena de fecha sea correcto
+    //     const [year, month, day] = dateString.split('-').map(Number);
+    //     const date = new Date(year, month - 1, day); // Crear la fecha sin UTC
+
+    //     return new Intl.DateTimeFormat('es-ES', {
+    //         year: '2-digit',
+    //         month: '2-digit',
+    //         day: '2-digit',
+    //     }).format(date);
+    // }
+
+
 
 
     return (
         <>
-            {filteredData .map((user, index) => (
+            {filteredData.map((user, index) => (
                 <Table.Row key={user.id}>
                     <Table.Cell className="p-4 whitespace-nowrap">
                         <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
                             <div className="text-base font-semibold text-gray-900 dark:text-white">
-                                {user.id }
-                               
+                                {user.id}
+
                             </div>
                         </div>
                     </Table.Cell>
@@ -404,6 +465,85 @@ const Component = function (data: any) {
                         <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
                             <div className="text-base font-semibold text-gray-900 dark:text-white">
                                 {user.name}
+                            </div>
+                        </div>
+                    </Table.Cell>
+                    <Table.Cell className="p-4 whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="text-base font-semibold text-gray-900 dark:text-white">
+                                {user.badge}
+                            </div>
+                        </div>
+                    </Table.Cell>
+                    <Table.Cell className="p-4 whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="text-base font-semibold text-gray-900 dark:text-white">
+                                {user.reference_number}
+                            </div>
+                        </div>
+                    </Table.Cell>
+                    <Table.Cell className="p-4 whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="text-base font-semibold text-gray-900 dark:text-white">
+                                ${user.credit_total}
+                            </div>
+                        </div>
+                    </Table.Cell>
+                    <Table.Cell className="p-4 whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="text-base font-semibold text-gray-900 dark:text-white">
+                                {user.total_payment}
+                            </div>
+                        </div>
+                    </Table.Cell>
+                    <Table.Cell className="p-4 whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="text-base font-semibold text-gray-900 dark:text-white">
+                                {goodDisplay(user.credit_start_date)}
+                            </div>
+                        </div>
+                    </Table.Cell>
+                    <Table.Cell className="p-4 whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="text-base font-semibold text-gray-900 dark:text-white">
+                                {goodDisplay(user.credit_end_date)}
+                            </div>
+                        </div>
+                    </Table.Cell>
+                    <Table.Cell className="p-4 whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="text-base font-semibold text-gray-900 dark:text-white">
+                                {goodDisplay(user.date_created)}
+                            </div>
+                        </div>
+                    </Table.Cell>
+                    <Table.Cell className="p whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="text-base font-semibold text-gray-900 dark:text-white">
+
+                                {user.status_credit == 'Pending' ? <>
+                                    <Badge className="bg-red-400 dark:bg-red-500 dark:text-white text-white">{user.status_credit}</Badge>
+                                </> : <>
+                                    <Badge className="bg-indigo-400">{user.status_credit}</Badge>
+                                </>}
+
+                            </div>
+                        </div>
+                    </Table.Cell>
+                    <Table.Cell className=" whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="flex text-base font-semibold text-gray-900 dark:text-white">
+
+                                <Button className="bg-orange-500">   <HiTable className="text-xl"></HiTable></Button>
+
+                            </div>
+                        </div>
+                    </Table.Cell>
+                    <Table.Cell className="whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="flex text-base font-semibold text-gray-900 dark:text-white">
+
+                                <Button>Edit</Button>
                             </div>
                         </div>
                     </Table.Cell>
@@ -599,7 +739,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
             <Button color="primary" onClick={() => { setOpen(true) }}>
                 <div className="flex items-center gap-x-3">
                     <HiPlus className="text-xl" />
-                    Add Bank
+                    Add Payrolls
                 </div>
             </Button>
             <Modal onClose={() => setOpen(false)} show={isOpen}>
@@ -737,13 +877,64 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
 const ExportModal: FC<any> = function (rawData) {
     const [isOpen, setOpen] = useState(false);
-    const data = rawData.data;
+
+
+
+    function goodDisplay(dateString: string | any): string {
+        const date: any = new Date(dateString);
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Los meses son 0-11
+        const year = String(date.getUTCFullYear()).slice(-2); // Obtener los últimos 2 dígitos del año
+
+        return `${day}/${month}/${year}`;
+    }
+
+
+    interface User {
+        name: string;
+        id: string;
+        id_bank: string;
+        badge: string;
+        reference_number: string;
+        active: string;
+        credit_start_date: string;
+        credit_end_date: string;
+        status_credit: string;
+        pending_payment: string;
+        credit_total: string;
+        total_payment: number;
+        date_created: string;
+        date: string;
+    }
+
+    const [dataGraphis, setDataGraphis] = useState<User[]>([]);
+
+
+    const data = dataGraphis;
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [graphisRes] = await Promise.all([
+                    axios.get('https://bn.glassmountainbpo.com:8080/credit/list_payrolls'),
+                ]);
+
+                setDataGraphis(graphisRes.data);
+
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
 
 
     const convertToCSV = (data: any) => {
         const csvRows = [];
         const allHeaders = Object.keys(data[0]);
-        const desiredOrder = ['id', 'name', 'method', 'bank_account', 'bank_check', 'active', 'date_created'];
+        const desiredOrder = ['id', 'name', 'badge', 'reference_number', 'credit_total', 'due', 'credit_start_date', 'credit_end_date', 'id_bank', 'name_bank', 'method_payment', 'bank_check_n', 'account_n', 'total_payment', 'status_credit', 'date_created'];
 
         const headers = desiredOrder.filter(header => allHeaders.includes(header));
 
@@ -765,15 +956,42 @@ const ExportModal: FC<any> = function (rawData) {
         csvRows.push(modifiedHeaders.join(','));
 
         for (const row of data) {
-            const values = headers.map(header => {
-                if (header === 'date_created') {
+            const values: any = headers.map(header => {
+                if (header === 'credit_start_date') {
+                    // Formatear las fechas como dd/mm/yyyy
+                    const date = new Date(row[header]);
+                    return goodDisplay(date)
+                    // return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                } else if (header === 'date_created') {
                     // Formatear las fechas como dd/mm/yyyy
                     const date = new Date(row[header]);
                     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                } else if (header === 'credit_end_date') {
+                    // Formatear las fechas como dd/mm/yyyy
+                    const date = new Date(row[header]);
+                    return goodDisplay(date)
+                } else if (header === 'date_created') {
+                    // Formatear las fechas como dd/mm/yyyy
+                    const date = new Date(row[header]);
+                    return goodDisplay(date)
                 } else if (header === 'name') {
                     // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
                     return row[header].split(',').join(' - ');
-                } else {
+                } else if (header === 'credit_start_date') {
+                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
+                    return row[header].split(',').join(' - ');
+                } else if (header === 'credit_end_date') {
+                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
+                    return row[header].split(',').join(' - ');
+                } else if (header === 'name_bank') {
+                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
+                    return row[header].split(',').join(' - ');
+                } else if (header === 'date_created') {
+                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
+                    const date = new Date(row[header]);
+                    return goodDisplay(date)
+                }
+                else {
                     return row[header];
                 }
             });
@@ -797,21 +1015,12 @@ const ExportModal: FC<any> = function (rawData) {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'banksReports.csv';
+        a.download = 'PayrollsReports.csv';
         a.click();
         window.URL.revokeObjectURL(url);
         setOpen(false);
     };
 
-    // Function to convert an array to an XLS file
-    const exportToXLS = () => {
-        console.log(data);
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-        XLSX.writeFile(wb, 'CardsReports.xlsx');
-        setOpen(false);
-    };
 
     return (
         <>
@@ -823,7 +1032,7 @@ const ExportModal: FC<any> = function (rawData) {
             </Button>
             <Modal onClose={() => setOpen(false)} show={isOpen} size="md">
                 <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-                    <strong>Export users</strong>
+                    <strong>Export Payrolls</strong>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col items-center gap-y-6 text-center">
                     <div className="flex items-center gap-x-3">
@@ -835,14 +1044,7 @@ const ExportModal: FC<any> = function (rawData) {
                                 </div>
                             </Button>
                         </div>
-                        <div>
-                            <Button onClick={exportToXLS} color="light">
-                                <div className="flex items-center gap-x-3">
-                                    <FiletypeXlsx className="text-xl" />
-                                    <span>Export XLSX</span>
-                                </div>
-                            </Button>
-                        </div>
+
                     </div>
                 </Modal.Body>
 
