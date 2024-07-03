@@ -32,13 +32,9 @@ const created_user2 = (created_user3 ? CryptoJS.AES.decrypt(created_user3, "Tyra
 const created_user = (created_user2 ? created_user2.toString(CryptoJS.enc.Utf8) : "");
 
 
-const PaymentsAll: FC = function () {
+const PayrollAll: FC = function () {
 
     const [sharedState, setSharedState] = useState(false);
-
-
-
-
     const updateSharedState = (newValue: boolean) => {
 
         setSharedState(newValue);
@@ -48,7 +44,7 @@ const PaymentsAll: FC = function () {
     console.log('$%^CreateUser', created_user, setSharedState)
     return (
         <NavbarSidebarLayout2 isFooter={true}>
-            <Payment
+            <Payroll
                 sharedState={sharedState} />
         </NavbarSidebarLayout2>
     );
@@ -56,7 +52,7 @@ const PaymentsAll: FC = function () {
 
 
 
-const Payment: FC<any> = function ({ sharedState }: any) {
+const Payroll: FC<any> = function ({ sharedState }: any) {
 
 
 
@@ -294,7 +290,7 @@ const Payment: FC<any> = function ({ sharedState }: any) {
                                 Total records
                             </Table.HeadCell>
                             <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
-                                Completed
+                                Pending
                             </Table.HeadCell>
                             <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
                                 Completed
@@ -332,9 +328,17 @@ const Payment: FC<any> = function ({ sharedState }: any) {
                                             <Table.Cell colSpan={Object.keys(row).length}>
                                                 <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
                                                     <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
-                                                        <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 ">
-                                                            <Table.HeadCell>Badge</Table.HeadCell>
+                                                        <Table.Head className="text-xs text-gray-700 uppercase bg-green-400 dark:bg-gray-700 dark:text-gray-400 ">
+                                                            <Table.HeadCell>Id  Payroll</Table.HeadCell>
                                                             <Table.HeadCell>Fullname</Table.HeadCell>
+                                                            <Table.HeadCell>Badge</Table.HeadCell>
+                                                            <Table.HeadCell>reference number</Table.HeadCell>
+                                                            <Table.HeadCell>Credit Total</Table.HeadCell>
+                                                            <Table.HeadCell>total unpaid installments</Table.HeadCell>
+                                                            <Table.HeadCell>credit start date</Table.HeadCell>
+                                                            <Table.HeadCell>credit end date</Table.HeadCell>
+                                                            <Table.HeadCell>date created</Table.HeadCell>
+                                                            <Table.HeadCell>Status</Table.HeadCell>
                                                         </Table.Head>
 
                                                         <Component data={row} className=' text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 hover:bg-primary-400'></Component>
@@ -861,4 +865,4 @@ const ExportModal: FC<any> = function (rawData) {
 
 
 
-export default PaymentsAll;
+export default PayrollAll;

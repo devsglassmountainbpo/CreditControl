@@ -12,7 +12,7 @@ import Inventory from "./pages/inventory/inventory";
 import UserListPage from "./pages/users/Users";
 import AllReports from "./pages/reports/reports";
 import BanksAll from "./pages/banks/banks";
-import PaymentsAll from "./pages/payments/payments";
+import PayrollAll from "./pages/payrolls/payrolls";
 import { Navigate } from 'react-router-dom';
 const container = document.getElementById("root");
 
@@ -60,8 +60,8 @@ root.render(
         />
 
         <Route
-          path="/payments"
-          element={user ? <PaymentsAll /> : <Navigate to="/SignIn" />}
+          path="/payrolls"
+          element={user ? <PayrollAll /> : <Navigate to="/SignIn" />}
         />
       </Routes>
 
