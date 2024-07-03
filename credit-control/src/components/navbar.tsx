@@ -70,12 +70,12 @@ const ExampleNavbar: FC = function () {
           <span>Banks</span>
         </Navbar.Link>
         <Navbar.Link
-          href="/payments"
-          className={` flex items-center space-x-2 ${activeLink === 'payments' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
-          onClick={() => handleSetActiveLink('payments')}
+          href="/payrolls"
+          className={` flex items-center space-x-2 ${activeLink === 'payrolls' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
+          onClick={() => handleSetActiveLink('payrolls')}
         >
           <FaBoxOpen className="mr-2" />
-          <span>Payments</span>
+          <span>Payrolls</span>
         </Navbar.Link>
       </Navbar.Collapse>
     </Navbar>
