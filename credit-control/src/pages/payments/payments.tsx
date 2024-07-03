@@ -59,8 +59,21 @@ const PaymentsAll: FC = function () {
 const Payment: FC<any> = function ({ sharedState }: any) {
 
 
-    
-    const [dataGraphis, setDataGraphis] = useState([]);
+
+    // const [dataGraphis, setDataGraphis] = useState([]);
+
+    // const dataGraphis: User[] = [
+    //     // Suponiendo que tus datos de usuario están aquí
+    //   ];
+
+    interface User {
+        name: string;
+        id: string;
+        // Añade otras propiedades que cada usuario pueda tener
+    }
+
+    const [dataGraphis, setDataGraphis] = useState<User[]>([]);
+
     // const [dataTotal, setDataTotal] = useState<totalSummary>({ total: '' });
 
 
@@ -89,6 +102,7 @@ const Payment: FC<any> = function ({ sharedState }: any) {
 
                 setDataGraphis(graphisRes.data);
 
+
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -108,33 +122,37 @@ const Payment: FC<any> = function ({ sharedState }: any) {
     };
 
 
+
+
     const exportToGraphis = () => {
-        // Supongamos que dataGraphis está disponible y tiene la estructura adecuada
-        const originalHeaders = ['asset', 'total_qty', ...dataGraphis.header.filter(header => header !== 'total_qty' && header !== 'asset')];
+        // Encabezados originales
+        const originalHeaders: any = Object.keys(dataGraphis[0]);
 
         // Convertir todos los encabezados a mayúsculas y agregar la nueva columna para la fecha del reporte
-        const headers = [...originalHeaders.map(header => header.toUpperCase()), 'DATE_REPORT']; // Fecha al final
-
+        const headers: any = [...originalHeaders.map((header: string) => header.toUpperCase()), 'DATE_REPORT']; // Fecha al final
 
         // Obtener la fecha actual
         const currentDate = getCurrentDate();
 
         // Convertir los datos a un formato adecuado para xlsx, incluyendo la nueva columna de fecha
-        const formattedData = rows.map(row => {
+        const formattedData: any = dataGraphis.map(row => {
             let formattedRow: any = {
                 'DATE_REPORT': currentDate // Nueva columna con la fecha actual
             };
-            originalHeaders.forEach((header) => {
+            originalHeaders.forEach((header: any) => {
                 formattedRow[header.toUpperCase()] = row[header]; // Usar los nombres de los encabezados originales en mayúsculas como claves
             });
             return formattedRow;
         });
 
         // Crear la hoja de cálculo
-        const ws = utils.json_to_sheet(formattedData, { header: headers });
+        const ws = utils.json_to_sheet(formattedData);
+
+        // Agregar encabezados a la hoja de cálculo manualmente
+        utils.sheet_add_aoa(ws, [headers], { origin: 'A1' });
 
         // Aplicar estilos a los encabezados
-        headers.forEach((_header, index) => {
+        headers.forEach((header: any, index: any) => {
             const cellAddress = utils.encode_cell({ r: 0, c: index }); // Celda en la primera fila (0) y columna correspondiente (index)
             if (!ws[cellAddress]) ws[cellAddress] = {}; // Asegúrate de que la celda existe
             ws[cellAddress].s = {
@@ -164,11 +182,6 @@ const Payment: FC<any> = function ({ sharedState }: any) {
         writeFile(wb, 'dataGraphis_export.xlsx');
     };
 
-
-
-
-
-
     const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
@@ -188,7 +201,9 @@ const Payment: FC<any> = function ({ sharedState }: any) {
 
     const [expandedRow, setExpandedRow] = useState(null);
 
-    const handleRowClick = (rowIndex: any) => {
+    const handleRowClick = (rowIndex: any, item: any) => {
+
+        console.log('=======================> enviamos este item', item)
         setExpandedRow(rowIndex === expandedRow ? null : rowIndex);
     };
 
@@ -204,6 +219,11 @@ const Payment: FC<any> = function ({ sharedState }: any) {
         }
     }, [sharedState]);
 
+    console.log(dataGraphis);
+
+
+
+    const columnOrder = ['id', 'name', 'total_records', 'pending_count', 'Completed_count'];
 
 
 
@@ -264,10 +284,6 @@ const Payment: FC<any> = function ({ sharedState }: any) {
                 <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
                     <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
                         <Table.Head >
-
-                            <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
-                                row
-                            </Table.HeadCell>
                             <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
                                 id
                             </Table.HeadCell>
@@ -275,7 +291,10 @@ const Payment: FC<any> = function ({ sharedState }: any) {
                                 name
                             </Table.HeadCell>
                             <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
-                                Pending
+                                Total records
+                            </Table.HeadCell>
+                            <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
+                                Completed
                             </Table.HeadCell>
                             <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
                                 Completed
@@ -286,43 +305,26 @@ const Payment: FC<any> = function ({ sharedState }: any) {
 
                         </Table.Head>
 
-
-
-
                         <Table.Body>
                             {dataGraphis.map((row: any, rowIndex: any) => (
                                 <>
                                     <Table.Row
                                         key={rowIndex}
-                                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                                        onClick={() => handleRowClick(rowIndex)}
+                                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-white"
+                                        onClick={() => handleRowClick(rowIndex, row)}
                                     >
-                                        {Object.keys(row).map(( e) => (
-                                            <Table.Cell  className="py-4 px-6 font-semibold">
-                                                <>
-                                                    <a
-                                                        className="bg-white text-gray-800 h-4 pt-0 dark:bg-gray-800 dark:text-white inline-block px-3 py-1 rounded"
-                                                        href={`/Inventory?filter=${row[e]}`}
-                                                    >
-                                                        {row[e]}
-                                                    </a>
-                                                  
-                                                </>
-                                                <Table.Cell>
-                                                 
+                                        {columnOrder.map((key) => (
+                                            <Table.Cell key={key} className="py-4 px-6 font-semibold">
+                                                {row[key]} {/* Accede al valor de cada clave según el orden definido */}
                                             </Table.Cell>
-                                               
-                                            </Table.Cell>
-                                           
                                         ))}
-
                                         <Table.Cell>
-                                        <button
-                                                        onClick={exportToGraphis}
-                                                        className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full right-0 top-10"
-                                                    >
-                                                        <HiTable className="h-7 w-7" />
-                                                    </button>
+                                            <button
+                                                onClick={exportToGraphis}
+                                                className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full right-0 top-10"
+                                            >
+                                                <HiTable className="h-7 w-7" />
+                                            </button>
                                         </Table.Cell>
                                     </Table.Row>
                                     {expandedRow === rowIndex && (
@@ -330,16 +332,13 @@ const Payment: FC<any> = function ({ sharedState }: any) {
                                             <Table.Cell colSpan={Object.keys(row).length}>
                                                 <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
                                                     <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
-                                                        <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                                            <Table.HeadCell>Nested Header 1</Table.HeadCell>
-                                                            <Table.HeadCell>Nested Header 2</Table.HeadCell>
+                                                        <Table.Head className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 ">
+                                                            <Table.HeadCell>Badge</Table.HeadCell>
+                                                            <Table.HeadCell>Fullname</Table.HeadCell>
                                                         </Table.Head>
-                                                        <Table.Body>
-                                                            <Table.Row className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                                                <Table.Cell className="py-4 px-6">Nested Data 1</Table.Cell>
-                                                                <Table.Cell className="py-4 px-6">Nested Data 2</Table.Cell>
-                                                            </Table.Row>
-                                                        </Table.Body>
+
+                                                        <Component data={row} className=' text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 hover:bg-primary-400'></Component>
+
                                                     </Table>
                                                 </div>
                                             </Table.Cell>
@@ -360,7 +359,70 @@ const Payment: FC<any> = function ({ sharedState }: any) {
 };
 
 
+const Component = function (data: any) {
 
+    interface User {
+        name: string;
+        id: string;
+        // Añade otras propiedades que cada usuario pueda tener
+    }
+    console.log('<<<<<<<<<<<<<<<<<<<<<<<<< este el item que recibimos', data)
+    
+    const idFilter =  data.data.id;
+    console.log('<<<<<<<<<<<<<<<<<<<<<<<<< este el item que que nos queda despues de filtrar', idFilter)
+
+    const [dataGraphis, setDataGraphis] = useState<User[]>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [graphisRes] = await Promise.all([
+                    axios.get('https://bn.glassmountainbpo.com:8080/credit/payments'),
+                ]);
+
+                setDataGraphis(graphisRes.data);
+
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const filteredData = dataGraphis.filter(user => user.id == idFilter);
+
+
+    return (
+        <>
+            {filteredData .map((user, index) => (
+                <Table.Row key={user.id}>
+                    <Table.Cell className="p-4 whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="text-base font-semibold text-gray-900 dark:text-white">
+                                {user.id }
+                               
+                            </div>
+                        </div>
+                    </Table.Cell>
+                    <Table.Cell className="p-4 whitespace-nowrap">
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            <div className="text-base font-semibold text-gray-900 dark:text-white">
+                                {user.name}
+                            </div>
+                        </div>
+                    </Table.Cell>
+                </Table.Row>
+            ))}
+        </>
+    )
+
+
+
+
+
+}
 
 
 const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any) {
