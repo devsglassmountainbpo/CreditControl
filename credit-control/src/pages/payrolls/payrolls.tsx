@@ -62,10 +62,25 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
         header: string | number | boolean;  // Especifica los tipos permitidos
     }
 
+    interface Users {
+        name: string;
+        id: string;
+        id_bank: string;
+        badge: string;
+        reference_number: string;
+        active: string;
+        credit_start_date: string;
+        credit_end_date: string;
+        status_credit: string;
+        pending_payment: string;
+        credit_total: string;
+        total_payment: number;
+        date_created: string;
+    }
+
 
     const [dataGraphis, setDataGraphis] = useState<User[]>([]);
-
-    // const [dataTotal, setDataTotal] = useState<totalSummary>({ total: '' });
+    const [Filtrado, setFiltrado] = useState<Users[]>([]);
 
 
     const [data, setData]: any = useState([]);
@@ -78,19 +93,15 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
 
 
     console.log(activeLink)
+
     //filtrando datos para los reportes
-
-
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [graphisRes] = await Promise.all([
                     axios.get('https://bn.glassmountainbpo.com:8080/credit/payments'),
                 ]);
-
                 setDataGraphis(graphisRes.data);
-
-
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -99,76 +110,21 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
         fetchData();
     }, [sharedState]);
 
+    useEffect(() => {
+        const fetchData3 = async () => {
+            try {
+                const [dataPayroll] = await Promise.all([
+                    axios.get('https://bn.glassmountainbpo.com:8080/credit/list_payrolls'),
+                ]);
+                setFiltrado(dataPayroll.data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
 
+        fetchData3();
+    }, [sharedState]);
 
-    const getCurrentDate = () => {
-        const now = new Date();
-        const day = String(now.getDate()).padStart(2, '0');
-        const month = String(now.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript son de 0 a 11
-        const year = now.getFullYear();
-        return `${day}/${month}/${year}`;
-    };
-
-
-
-
-    const exportToGraphis = () => {
-        // Encabezados originales
-        const originalHeaders: any = Object.keys(dataGraphis[0]);
-
-        // Convertir todos los encabezados a mayúsculas y agregar la nueva columna para la fecha del reporte
-        const headers: any = [...originalHeaders.map((header: string) => header.toUpperCase()), 'DATE_REPORT']; // Fecha al final
-
-        // Obtener la fecha actual
-        const currentDate = getCurrentDate();
-
-        // Convertir los datos a un formato adecuado para xlsx, incluyendo la nueva columna de fecha
-        const formattedData: any = dataGraphis.map(row => {
-            let formattedRow: any = {
-                'DATE_REPORT': currentDate // Nueva columna con la fecha actual
-            };
-            originalHeaders.forEach((header: any) => {
-                formattedRow[header.toUpperCase()] = row[header]; // Usar los nombres de los encabezados originales en mayúsculas como claves
-            });
-            return formattedRow;
-        });
-
-        // Crear la hoja de cálculo
-        const ws = utils.json_to_sheet(formattedData);
-
-        // Agregar encabezados a la hoja de cálculo manualmente
-        utils.sheet_add_aoa(ws, [headers], { origin: 'A1' });
-
-        // Aplicar estilos a los encabezados
-        headers.forEach((header: any, index: any) => {
-            const cellAddress = utils.encode_cell({ r: 0, c: index }); // Celda en la primera fila (0) y columna correspondiente (index)
-            if (!ws[cellAddress]) ws[cellAddress] = {}; // Asegúrate de que la celda existe
-            ws[cellAddress].s = {
-                fill: {
-                    fgColor: { rgb: "000000" } // Fondo negro
-                },
-                font: {
-                    color: { rgb: "FFFFFF" }, // Texto blanco
-                    bold: true // Texto en negrita para mayor claridad
-                },
-                alignment: {
-                    horizontal: 'center', // Alineación horizontal
-                    vertical: 'center' // Alineación vertical
-                }
-            };
-        });
-
-        // Ajustar el tamaño de las columnas al contenido
-        const columnWidths = headers.map(header => ({ wch: header.length + 5 })); // Ajusta según sea necesario
-        ws['!cols'] = columnWidths;
-
-        // Crear el libro de trabajo
-        const wb = utils.book_new();
-        utils.book_append_sheet(wb, ws, 'Data');
-
-        // Guardar el archivo Excel
-        writeFile(wb, 'dataGraphis_export.xlsx');
-    };
 
     const [isReady, setIsReady] = useState(false);
 
@@ -302,27 +258,25 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
                                         {columnOrder.map((key) => (
                                             <Table.Cell key={key} className="py-4 px-6 font-semibold">
 
-                                                {typeof row[key] === 'number' && row[key] <= 30? (
+                                                {typeof row[key] === 'number' && row[key] <= 30 ? (
                                                     <>
-                                                        <span className="bg-green-400 text-white font-semibold px-2 py-0.5 rounded-full dark:bg-green-400 dark:text-white">
-                                                       {row[key]} 
+                                                        <span className="bg-gray-400 text-white font-semibold px-2 py-0.5 rounded-full dark:bg-green-400 dark:text-white">
+                                                            {row[key]}
                                                         </span>
                                                     </>
 
                                                 ) : (
                                                     row[key]
                                                 )}
-
-
-
                                             </Table.Cell>
                                         ))}
                                         <Table.Cell>
                                             <button
-                                                onClick={exportToGraphis}
-                                                className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded-full right-0 top-10"
+                                                // onClick={exportToGraphis}
+                                                onClick={() => dataInject(Filtrado, row)}
+                                                className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded right-0 top-10 "
                                             >
-                                                <HiTable className="h-7 w-7" />
+                                                <HiTable className="h-7 w-7 " />
                                             </button>
                                         </Table.Cell>
                                     </Table.Row>
@@ -377,7 +331,7 @@ const Component = function (data: any) {
         badge: string;
         reference_number: string;
         active: string;
-        credit_start_date: s;
+        credit_start_date: string;
         credit_end_date: string;
         status_credit: string;
         pending_payment: string;
@@ -534,7 +488,7 @@ const Component = function (data: any) {
                         <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
                             <div className="flex text-base font-semibold text-gray-900 dark:text-white">
 
-                                <Button className="bg-orange-500">   <HiTable className="text-xl"></HiTable></Button>
+                                <Button className="bg-yellow-300 hover:bg-yellow-400">   <HiTable className="text-xl"></HiTable></Button>
 
                             </div>
                         </div>
@@ -551,11 +505,114 @@ const Component = function (data: any) {
             ))}
         </>
     )
+}
 
 
+const dataInject = (w: any, item: any) => {
 
+    const id = item.id;
+    const dataFiltrado = w;
+   
+    function goodDisplay(dateString: string | any): string {
+        const date: any = new Date(dateString);
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Los meses son 0-11
+        const year = String(date.getUTCFullYear()).slice(-2); // Obtener los últimos 2 dígitos del año
 
+        return `${day}/${month}/${year}`;
+    }
+    
+    const filteredData = dataFiltrado.filter((user: { id_bank: any; }) => user.id_bank == id);
+    const data = filteredData;
+    
+    const convertToCSV = (data: any) => {
+        const csvRows = [];
+        const allHeaders = Object.keys(data[0]);
+        const desiredOrder = ['id', 'name', 'badge', 'reference_number', 'credit_total', 'due', 'credit_start_date', 'credit_end_date', 'id_bank', 'name_bank', 'method_payment', 'bank_check_n', 'account_n', 'total_payment', 'status_credit', 'date_created'];
 
+        const headers = desiredOrder.filter(header => allHeaders.includes(header));
+
+        // Modificar las cabeceras según sea necesario
+        const modifiedHeaders = headers.map(header => {
+            if (header === 'date_created') {
+                return header.toUpperCase(); // Convertir a mayúsculas
+            } else if (header === 'bank_account') {
+                return 'BANK ACCOUNT'; // Cambiar el nombre de la cabecera
+            } else if (header === 'bank_check') {
+                return 'BANK CHECK'; // Cambiar el nombre de la cabecera
+            } else if (header === 'method') {
+                return 'METHOD'; // Cambiar el nombre de la cabecera
+            } else {
+                return header.toUpperCase(); // Convertir a mayúsculas
+            }
+        });
+
+        csvRows.push(modifiedHeaders.join(','));
+
+        for (const row of data) {
+            const values: any = headers.map(header => {
+                if (header === 'credit_start_date') {
+                    // Formatear las fechas como dd/mm/yyyy
+                    const date = new Date(row[header]);
+                    return goodDisplay(date)
+                    // return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                } else if (header === 'date_created') {
+                    // Formatear las fechas como dd/mm/yyyy
+                    const date = new Date(row[header]);
+                    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                } else if (header === 'credit_end_date') {
+                    // Formatear las fechas como dd/mm/yyyy
+                    const date = new Date(row[header]);
+                    return goodDisplay(date)
+                } else if (header === 'date_created') {
+                    // Formatear las fechas como dd/mm/yyyy
+                    const date = new Date(row[header]);
+                    return goodDisplay(date)
+                } else if (header === 'name') {
+                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
+                    return row[header].split(',').join(' - ');
+                } else if (header === 'credit_start_date') {
+                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
+                    return row[header].split(',').join(' - ');
+                } else if (header === 'credit_end_date') {
+                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
+                    return row[header].split(',').join(' - ');
+                } else if (header === 'name_bank') {
+                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
+                    return row[header].split(',').join(' - ');
+                } else if (header === 'date_created') {
+                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
+                    const date = new Date(row[header]);
+                    return goodDisplay(date)
+                }
+                else {
+                    return row[header];
+                }
+            });
+            csvRows.push(values.join(','));
+        }
+
+        return csvRows.join('\n');
+    };
+
+    // Function to export data to CSV and prompt download
+    const exportToCSV = () => {
+        console.log(data);
+
+        const csvContent = convertToCSV(data);
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' }); // Añadir BOM para Excel
+
+        // const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'PayrollsReports.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+    };
+
+    exportToCSV();
 }
 
 
