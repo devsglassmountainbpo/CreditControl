@@ -5,7 +5,8 @@ import {
     Table,
     TextInput,
     Button,
-    Label, Badge
+    Label, Badge,
+    Card
 } from "flowbite-react";
 import type { FC, JSXElementConstructor, Key, ReactElement, ReactFragment, ReactPortal } from "react";
 import { useEffect, useState } from "react";
@@ -281,11 +282,11 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
                                         </Table.Cell>
                                     </Table.Row>
                                     {expandedRow === rowIndex && (
-                                        <Table.Row className="bg-gray-100 dark:bg-gray-900">
+                                        <Table.Row className="bg-gray-100 dark:bg-gray-900" >
                                             <Table.Cell colSpan={Object.keys(row).length}>
                                                 <div className="overflow-x-auto relative shadow-md sm:rounded-lg w-full">
                                                     <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" hoverable>
-                                                        <Table.Head className="text-xs text-gray-700 uppercase bg-primary-500 text-white dark:bg-gray-700 dark:text-gray-400 ">
+                                                        <Table.Head className="text-xs  uppercase bg-primary-500 text-white dark:bg-gray-700 dark:text-gray-400 ">
                                                             <Table.HeadCell>Id  Payroll</Table.HeadCell>
                                                             <Table.HeadCell>Fullname</Table.HeadCell>
                                                             <Table.HeadCell>Badge</Table.HeadCell>
@@ -299,6 +300,7 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
                                                             <Table.HeadCell>Print</Table.HeadCell>
                                                             <Table.HeadCell>Action</Table.HeadCell>
                                                         </Table.Head>
+
 
                                                         <Component data={row} className=' text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 hover:bg-primary-400'></Component>
 
@@ -325,7 +327,7 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
 const Component = function (data: any) {
 
     interface User {
-        name: string;
+        name_: string;
         id: string;
         id_bank: string;
         badge: string;
@@ -338,6 +340,7 @@ const Component = function (data: any) {
         credit_total: string;
         total_payment: number;
         date_created: string;
+        photo: string;
     }
     console.log('<<<<<<<<<<<<<<<<<<<<<<<<< este el item que recibimos', data)
 
@@ -366,15 +369,7 @@ const Component = function (data: any) {
 
     const filteredData = dataGraphis.filter(user => user.id_bank == idFilter);
 
-
-    // function goodDisplay(dateString: string): string {
-    //     const date = new Date(dateString);
-    //     return new Intl.DateTimeFormat('es-ES', {
-    //         year: '2-digit',
-    //         month: '2-digit',
-    //         day: '2-digit',
-    //     }).format(date);
-    // }
+    console.log('Un dolor de cabeza menos :D', filteredData);
 
     function goodDisplay(dateString: string): string {
         const date = new Date(dateString);
@@ -385,29 +380,11 @@ const Component = function (data: any) {
         return `${day}/${month}/${year}`;
     }
 
-
-
-
-    // function goodDisplay(dateString: string): string {
-    //     // Asegurarse de que el formato de la cadena de fecha sea correcto
-    //     const [year, month, day] = dateString.split('-').map(Number);
-    //     const date = new Date(year, month - 1, day); // Crear la fecha sin UTC
-
-    //     return new Intl.DateTimeFormat('es-ES', {
-    //         year: '2-digit',
-    //         month: '2-digit',
-    //         day: '2-digit',
-    //     }).format(date);
-    // }
-
-
-
-
     return (
         <>
             {filteredData.map((user, index) => (
-                <Table.Row key={user.id}>
-                    <Table.Cell className="p-4 whitespace-nowrap">
+                <Table.Row key={user.id} className="">
+                    <Table.Cell className="p-4 whitespace-nowrap ">
                         <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
                             <div className="text-base font-semibold text-gray-900 dark:text-white">
                                 {user.id}
@@ -417,8 +394,32 @@ const Component = function (data: any) {
                     </Table.Cell>
                     <Table.Cell className="p-4 whitespace-nowrap">
                         <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                            <div className="text-base font-semibold text-gray-900 dark:text-white">
-                                {user.name}
+                            <div className=" flex text-base font-semibold text-gray-900 dark:text-white">
+                                <div className='flex realtive mr-4'
+                                    style={{
+                                        width: '45px',
+                                        height: '45px',
+                                        overflow: 'hidden',
+                                        borderRadius: '20%',
+                                    }}
+                                    > 
+                                    <img
+                                        className='realtive'
+                                        src={'https://hr.glassmountainbpo.com/ap/employee/document/foto/' + (user.photo !=='' ? user.photo : 'user.png')}
+                                        alt="user"
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                        }}
+                                        />
+                                       
+                                </div>
+                                <div className="mt-3">
+                                        {user.name_}
+                                </div>
+                                    
+                              
                             </div>
                         </div>
                     </Table.Cell>
@@ -488,8 +489,9 @@ const Component = function (data: any) {
                         <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
                             <div className="flex text-base font-semibold text-gray-900 dark:text-white">
 
-                                <Button className="bg-yellow-300 hover:bg-yellow-400">   <HiTable className="text-xl"></HiTable></Button>
+                                {/* <Button className="bg-yellow-300 hover:bg-yellow-400">   <HiTable className="text-xl"></HiTable></Button> */}
 
+                                <ListPayments data={[filteredData[index]]} id_filter={user.id} />
                             </div>
                         </div>
                     </Table.Cell>
@@ -512,7 +514,7 @@ const dataInject = (w: any, item: any) => {
 
     const id = item.id;
     const dataFiltrado = w;
-   
+
     function goodDisplay(dateString: string | any): string {
         const date: any = new Date(dateString);
         const day = String(date.getUTCDate()).padStart(2, '0');
@@ -521,10 +523,10 @@ const dataInject = (w: any, item: any) => {
 
         return `${day}/${month}/${year}`;
     }
-    
+
     const filteredData = dataFiltrado.filter((user: { id_bank: any; }) => user.id_bank == id);
     const data = filteredData;
-    
+
     const convertToCSV = (data: any) => {
         const csvRows = [];
         const allHeaders = Object.keys(data[0]);
@@ -923,6 +925,303 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                         Save
                     </Button>
                 </Modal.Footer>
+            </Modal >
+        </>
+    );
+};
+
+
+
+
+
+const ListPayments: FC<any> = function ({ data, id_filter }: any) {
+
+    console.log('LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL', id_filter)
+    const [isOpen, setOpen] = useState(false);
+    const [supBadge, setSupBadge] = useState<any>('');
+    const [result, setResult] = useState<any>([]);
+    const [supervisorName, setSupervisorName] = useState('');
+
+    const [name, setName] = useState(data[0].name);
+    const [statusActive, setStatusActive] = useState('');
+
+    // Bank Check Payment
+    const [bankCheckPayment, setBankCheckPayment] = useState('');
+    // Bank  account n
+    const [bankAccountNumber, setBankAccountNumber] = useState('');
+
+
+
+    const [methodPayment, setMethodCategory] = useState('');
+    // const [idCategory, setIdCategory] = useState('');
+
+    const cpm = data;
+
+
+    console.log('estas son la categorias seleccionadas', methodPayment)
+    console.log('esto es nuestro recurso', data)
+
+
+    const urlHired = `https://bn.glassmountainbpo.com:8080/api/hired/`;
+
+    const handleTrack = () => {
+        if (supBadge.length !== 0) {
+            axios.get(urlHired + supBadge)
+                .then((response => {
+                    setResult(response.data);
+                    const data = response.data;
+                    if (data.first_name !== undefined) {
+                        setSupervisorName(data.first_name + " " + data.second_name + " " + data.first_last_name + " " + data.second_last_name);
+                    } else {
+                        setSupervisorName('');
+                    }
+                }));
+        }
+    };
+
+    const handleKeyPress = (e: { key: string; }) => {
+        if (e.key === "Enter") {
+            handleTrack();
+        }
+    };
+
+
+    const resetFields = () => {
+        setName('');
+        setSupBadge('');
+        setStatusActive('');
+        setSupervisorName('');
+    };
+
+    console.log(result, supervisorName)
+
+
+
+
+    const url2 = `https://bn.glassmountainbpo.com:8080/inventory/addBank`;
+    const handleSubmit = async (e: React.FormEvent) => {
+        if (!name) {
+            alert('Enter a valid category name')
+        } else if (!statusActive) {
+            alert('Enter a valid status!')
+        } else {
+            e.preventDefault()
+            try {
+                const response = await axios.post(url2, {
+                    name,
+                    statusActive,
+                    created_user,
+                    methodPayment,
+                    bankCheckPayment,
+                    bankAccountNumber,
+                    info
+                })
+                if (response.status == 200) {
+                    const responseData = response.data;
+                    // updateSharedState(!sharedState);
+
+                    if (responseData.message === "ok") {
+                        setOpen(false);
+                        resetFields();
+                        alert('Brand created successfully!')
+                    } else {
+                        console.log("Fatal Error");
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+                setOpen(false)
+            }
+        }
+    }
+
+
+    // auditoria 
+
+    interface BrowserInfo {
+        browser: string;
+        device: string;
+        os: string;
+        location: string; // Lugar que será obtenido después
+    }
+
+
+    const [info, setInfo] = useState<BrowserInfo>({
+        browser: '',
+        device: '',
+        os: '',
+        location: 'Unknown',
+    });
+
+    useEffect(() => {
+        // Obtiene información del navegador
+        const parser = new UAParser();
+        const browserName = parser.getBrowser().name || 'Unknown';
+        const deviceType = parser.getDevice().type || 'Unknown';
+        const osName = parser.getOS().name || 'Unknown';
+
+        // Actualiza información del navegador y dispositivo
+        setInfo({
+            ...info,
+            browser: browserName,
+            device: deviceType,
+            os: osName,
+        });
+
+        // Obtiene la ubicación geográfica (si el usuario lo permite)
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    setInfo((prevInfo) => ({
+                        ...prevInfo,
+                        location: `Lat: ${lat}, Lon: ${lon}`,
+                    }));
+                },
+                (error) => {
+                    console.error('Error obteniendo ubicación:', error);
+                }
+            );
+        }
+    }, []); // Solo se ejecuta una vez al montar el componente
+
+    console.log('XXXXXXXXXXXXXXXXXXXXXX info: ', info);
+
+    const [dataInternal, setDataInternal] = useState([] as any[]);
+
+    useEffect(() => {
+        axios.get('https://bn.glassmountainbpo.com:8080/inventory/listCategory')
+            .then(res => {
+                // If userLevel is not 2, set data as is
+                const filteredData = res.data.filter((item: { active: number; }) => item.active == 1);
+                setDataInternal(filteredData);
+
+            })
+    }, [created_user]); // Add userLevel and created_user to the dependency array
+
+
+
+
+    useEffect(() => {
+        if (methodPayment === 'BANK CHECK') {
+            setBankCheckPayment('');
+        } else if (methodPayment === 'ACCOUNT BANK NUMBER') {
+            setBankAccountNumber('');
+        } else if (methodPayment === '') {
+            setBankCheckPayment('');
+            setBankAccountNumber('');
+        }
+    }, [methodPayment]);
+
+
+
+    return (
+        <>
+            {/* <Button color="primary" onClick={() => { setOpen(true) }}>
+                <div className="flex items-center gap-x-3">
+                    <HiPlus className="text-xl" />
+                    Add Payrolls
+                </div>
+            </Button> */}
+            <Button className="bg-yellow-300 hover:bg-yellow-400" onClick={() => { setOpen(true)  }}>   <HiTable className="text-xl"></HiTable></Button>
+            <Modal onClose={() => setOpen(false)} show={isOpen} className="w-full sm:grid-cols-3">
+                <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700 text-gray-200">
+                    <strong>Payment management!</strong>
+                </Modal.Header>
+                <Modal.Body>
+                    {/*      
+                    <div className="overflow-x-auto mt-5 bg-gray-100 rounded-md">
+                        <h3 className=" ml-5 text-1sm" >Detalle de pago</h3>
+                    </div> */}
+                    <div className="overflow-x-auto mt-0 bg-gray-100 rounded-md">
+                        <Card className="max-w-auto">
+                            <div className="flex">
+                                <div className='realtive mr-4'
+                                    style={{
+                                        width: '115px',
+                                        height: '85px',
+                                        overflow: 'hidden',
+                                        borderRadius: '20%',
+                                    }}
+                                >
+                                    <img
+                                        className='realtive'
+                                        src={'https://hr.glassmountainbpo.com/ap/employee/document/foto/' + (data[0].photo !=='' ? data[0].photo : 'user.png')}
+                                        alt="user"
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+                                </div>
+
+                                <h5 className="mb-1 text-3xl font-bold text-gray-900 dark:text-white">{data[0].name_}</h5>
+                                <h5 className="mb-1 text-right text-2xl font-bold text-gray-700 dark:text-white pl-48">Badge: {data[0].badge}</h5>
+
+                            </div>
+                            <h6 className="mb-1 text-1xl font-bold text-gray-900 dark:text-white">Bank Name: {data[0].name_bank}</h6>
+                            <p className="mb-1 text-base text-gray-600 dark:text-gray-400 sm:text-lg">
+                                Method Payment: {data[0].method_payment}
+                                <p className="mb-0 text-base text-gray-600 dark:text-gray-400 sm:text-lg">
+                                    Check Number: {data[0].bank_check_n}
+                                </p>
+                                <p className="mb-0 text-base text-gray-600 dark:text-gray-400 sm:text-lg">
+                                    Number Account: {data[0].account_n}
+                                </p>
+                            </p>
+                            <h6 className="mb-2 text-1xl font-bold text-gray-900 dark:text-white">Details</h6>
+                            <p className="mb-5 text-base text-gray-600 dark:text-gray-400 sm:text-lg">
+                                Reference Number: {data[0].reference_number}
+                                <p className="mb-0 text-base text-gray-600 dark:text-gray-400 sm:text-lg">
+                                    Due: ${data[0].due}
+                                </p>
+                                <p className="mb-0 text-base text-gray-600 dark:text-gray-400 sm:text-lg">
+                                    Active: {data[0].active == "1" ? "Yes" : "No"}
+                                </p>
+                                <div className="flex">
+                                    <p className=" flex mb-0 text-base text-gray-600 dark:text-gray-400 sm:text-lg">
+                                        Pending Payment:  <a className="ml-2 mr-4 px-2 py-1 font-bold  rounded-full bg-green-500 text-white flex text-sm">{data[0].pending_payment}</a>
+                                    </p>
+                                </div>
+                            </p>
+
+                            <div className="items-center pt-7 justify-center space-y-4 sm:flex sm:space-x-4 sm:space-y-0">
+                                <a
+                                    href="#"
+                                    className="inline-flex w-full items-center justify-center rounded-lg bg-primary-700 px-12 py-2.5 text-white hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 sm:w-auto"
+                                    onClick={(e) => { handleSubmit(e) }}
+                                >
+
+                                    <div className="text-left">
+                                        <div className="mb-1 text-sm">Credit Total</div>
+                                        <div className="-mt-1 font-sans text-1xl font-semibold">${data[0].credit_total}</div>
+                                    </div>
+                                </a>
+                                <a
+                                    href="#"
+                                    className="inline-flex w-full items-center justify-center rounded-lg bg-yellow-300 px-12 py-2.5 text-white hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 sm:w-auto"
+                                    onClick={(e) => { handleSubmit(e) }}
+                                >
+                                    <div className="text-left">
+                                        <div className="mb-1 text-sm">Credit Status</div>
+                                        <div className="-mt-1 font-sans text-1xl font-semibold">{data[0].status_credit}</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </Card>
+                    </div>
+
+
+                </Modal.Body>
+                {/* <Modal.Footer>
+                    <Button
+                        color="primary"
+                        onClick={(e) => { handleSubmit(e) }}>
+                        Save
+                    </Button>
+                </Modal.Footer> */}
             </Modal >
         </>
     );
