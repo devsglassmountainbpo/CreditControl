@@ -13,6 +13,7 @@ import UserListPage from "./pages/users/Users";
 import AllReports from "./pages/reports/reports";
 import BanksAll from "./pages/banks/banks";
 import PayrollAll from "./pages/payrolls/payrolls";
+import Reports from "./pages/reports/reports"
 import { Navigate } from 'react-router-dom';
 const container = document.getElementById("root");
 
@@ -63,6 +64,12 @@ root.render(
           path="/payrolls"
           element={user ? <PayrollAll /> : <Navigate to="/SignIn" />}
         />
+
+        <Route
+          path="/reports"
+          element={user ? <Reports /> : <Navigate to="/SignIn" />}
+        />
+
       </Routes>
 
     </BrowserRouter>

@@ -77,6 +77,14 @@ const ExampleNavbar: FC = function () {
           <FaBoxOpen className="mr-2" />
           <span>Payrolls</span>
         </Navbar.Link>
+        <Navbar.Link
+          href="/reports"
+          className={` flex items-center space-x-2 ${activeLink === 'reports' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
+          onClick={() => handleSetActiveLink('reports')}
+        >
+          <FaList className="mr-2" />
+          <span>Reports</span>
+        </Navbar.Link>
       </Navbar.Collapse>
     </Navbar>
 
