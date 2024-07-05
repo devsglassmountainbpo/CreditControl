@@ -999,41 +999,92 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
 
 
     const url2 = `https://bn.glassmountainbpo.com:8080/inventory/addBank`;
-    const handleSubmit = async (e: React.FormEvent) => {
-        if (!name) {
-            alert('Enter a valid category name')
-        } else if (!statusActive) {
-            alert('Enter a valid status!')
-        } else {
-            e.preventDefault()
-            try {
-                const response = await axios.post(url2, {
-                    name,
-                    statusActive,
-                    created_user,
-                    methodPayment,
-                    bankCheckPayment,
-                    bankAccountNumber,
-                    info
-                })
-                if (response.status == 200) {
-                    const responseData = response.data;
-                    // updateSharedState(!sharedState);
+    // const handleSubmit = async (e: React.FormEvent) => {
+    //     if (!name) {
+    //         alert('Enter a valid category name')
+    //     } else if (!statusActive) {
+    //         alert('Enter a valid status!')
+    //     } else {
+    //         e.preventDefault()
+    //         try {
+    //             const response = await axios.post(url2, {
+    //                 name,
+    //                 statusActive,
+    //                 created_user,
+    //                 methodPayment,
+    //                 bankCheckPayment,
+    //                 bankAccountNumber,
+    //                 info
+    //             })
+    //             if (response.status == 200) {
+    //                 const responseData = response.data;
+    //                 // updateSharedState(!sharedState);
 
-                    if (responseData.message === "ok") {
-                        setOpen(false);
-                        resetFields();
-                        alert('Brand created successfully!')
-                    } else {
-                        console.log("Fatal Error");
-                    }
-                }
-            } catch (error) {
-                console.log(error);
-                setOpen(false)
-            }
+    //                 if (responseData.message === "ok") {
+    //                     setOpen(false);
+    //                     resetFields();
+    //                     alert('Brand created successfully!')
+    //                 } else {
+    //                     console.log("Fatal Error");
+    //                 }
+    //             }
+    //         } catch (error) {
+    //             console.log(error);
+    //             setOpen(false)
+    //         }
+    //     }
+    // }
+
+
+    
+    const handleSubmit = async (e: any) => {
+        e.preventDefault();
+        let reportUrl = '';
+      
+            reportUrl = `https://bn.glassmountainbpo.com:8080/creditControl/reportTwo/${data[0].badge}`;
+      
+        try {
+            const response = await axios.get(reportUrl);
+            const data = response.data;
+            const csv = jsonToCsv(data);
+            downloadCsv(csv, `Payment_report_${data[0].badge}.csv`);
+        } catch (error) {
+            console.error('Error fetching the report:', error);
         }
-    }
+    };
+
+    
+    const handleSubmit2 = async (e: any) => {
+        e.preventDefault();
+        let reportUrl = '';
+            reportUrl = `https://bn.glassmountainbpo.com:8080/creditControl/reportOne/${data[0].badge}`;
+        try {
+            const response = await axios.get(reportUrl);
+            const data = response.data;
+            const csv = jsonToCsv(data);
+            downloadCsv(csv, `Payment_report_${data[0].badge}.csv`);
+        } catch (error) {
+            console.error('Error fetching the report:', error);
+        }
+    };
+
+    const jsonToCsv = (json: any) => {
+        const headers = Object.keys(json[0]);
+        const csvRows = [headers.join(','), ...json.map((row: any) =>
+            headers.map(header => `"${row[header]}"`).join(',')
+        )];
+        return csvRows.join('\n');
+    };
+
+    const downloadCsv = (csv: string, filename: string) => {
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
 
     // auditoria 
@@ -1139,8 +1190,8 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
                             <div className="flex">
                                 <div className='realtive mr-4'
                                     style={{
-                                        width: '115px',
-                                        height: '85px',
+                                        width: '125px',
+                                        height: '95px',
                                         overflow: 'hidden',
                                         borderRadius: '20%',
                                     }}
@@ -1158,7 +1209,7 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
                                 </div>
 
                                 <h5 className="mb-1 text-3xl font-bold text-gray-900 dark:text-white">{data[0].name_}</h5>
-                                <h5 className="mb-1 text-right text-2xl font-bold text-gray-700 dark:text-white pl-48">Badge: {data[0].badge}</h5>
+                                <h5 className="mb-1 text-right text-2xl font-bold text-gray-700 dark:text-white pl-2">Badge: {data[0].badge}</h5>
 
                             </div>
                             <h6 className="mb-1 text-1xl font-bold text-gray-900 dark:text-white">Bank Name: {data[0].name_bank}</h6>
@@ -1182,7 +1233,11 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
                                 </p>
                                 <div className="flex">
                                     <p className=" flex mb-0 text-base text-gray-600 dark:text-gray-400 sm:text-lg">
-                                        Pending Payment:  <a className="ml-2 mr-4 px-2 py-1 font-bold  rounded-full bg-green-500 text-white flex text-sm">{data[0].pending_payment}</a>
+                                    Credit Status {data[0].status_credit=='Pending' ? <>
+                                        <a className="ml-2 mr-4 px-2 py-1 font-bold  rounded-full bg-yellow-300 text-gray-700 flex text-sm">{data[0].status_credit}</a>
+                                    </>:<>
+                                        <a className="ml-2 mr-4 px-2 py-1 font-bold  rounded-full bg-green-500 text-white flex text-sm">{data[0].status_credit}</a>
+                                    </>}
                                     </p>
                                 </div>
                             </p>
@@ -1190,8 +1245,8 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
                             <div className="items-center pt-7 justify-center space-y-4 sm:flex sm:space-x-4 sm:space-y-0">
                                 <a
                                     href="#"
-                                    className="inline-flex w-full items-center justify-center rounded-lg bg-primary-700 px-12 py-2.5 text-white hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 sm:w-auto"
-                                    onClick={(e) => { handleSubmit(e) }}
+                                    className="inline-flex w-full items-center justify-center rounded-lg bg-primary-600 px-12 py-2.5 text-white hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 sm:w-auto"
+                                    onClick={(e) => { handleSubmit2(e) }}
                                 >
 
                                     <div className="text-left">
@@ -1201,12 +1256,13 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
                                 </a>
                                 <a
                                     href="#"
-                                    className="inline-flex w-full items-center justify-center rounded-lg bg-yellow-300 px-12 py-2.5 text-white hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 sm:w-auto"
+                                    className="inline-flex w-full items-center justify-center rounded-lg bg-green-500 px-12 py-2.5 text-white hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 sm:w-auto"
                                     onClick={(e) => { handleSubmit(e) }}
                                 >
                                     <div className="text-left">
-                                        <div className="mb-1 text-sm">Credit Status</div>
-                                        <div className="-mt-1 font-sans text-1xl font-semibold">{data[0].status_credit}</div>
+                                        <div className="mb-1 text-sm">Pending Payment
+                                        </div>
+                                        <div className="-mt-1 ml-9 font-sans text-1xl font-semibold">{data[0].pending_payment}</div>
                                     </div>
                                 </a>
                             </div>
