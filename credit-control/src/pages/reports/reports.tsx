@@ -218,7 +218,6 @@ const AllReports: FC = function () {
 
         </NavbarSidebarLayout2>
 
-
     );
 };
 
