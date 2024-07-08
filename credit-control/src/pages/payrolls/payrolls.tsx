@@ -6,7 +6,7 @@ import {
     TextInput,
     Button,
     Label, Badge,
-    Card
+    Card, Alert, Accordion
 } from "flowbite-react";
 import type { FC, JSXElementConstructor, Key, ReactElement, ReactFragment, ReactPortal } from "react";
 import { useEffect, useState } from "react";
@@ -292,7 +292,7 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
                                                             <Table.HeadCell>Badge</Table.HeadCell>
                                                             <Table.HeadCell>reference number</Table.HeadCell>
                                                             <Table.HeadCell>Credit Total</Table.HeadCell>
-                                                            <Table.HeadCell>total unpaid </Table.HeadCell>
+                                                            <Table.HeadCell>total of unpaid installments </Table.HeadCell>
                                                             <Table.HeadCell>credit start date</Table.HeadCell>
                                                             <Table.HeadCell>credit end date</Table.HeadCell>
                                                             <Table.HeadCell>date created</Table.HeadCell>
@@ -624,16 +624,26 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
     const [result, setResult] = useState<any>([]);
     const [supervisorName, setSupervisorName] = useState('');
 
-    const [name, setName] = useState('');
+    const [nameBank, setNameBank] = useState('');
     const [badge, setBadge] = useState<any>(''); //Badge
 
     const [statusActive, setStatusActive] = useState('');
+
+    const [acountNumber, setAcountNumber] = useState('');
+    const [bankCheck, setBankCheck] = useState('');
+
 
     // Bank Check Payment
     const [bankCheckPayment, setBankCheckPayment] = useState('');
     // Bank  account n
     const [bankAccountNumber, setBankAccountNumber] = useState('');
-
+    // Bank List
+    interface BankData {
+        id: number;
+        name: string;
+    }
+    // Bank List
+    const [bankData, setBankData] = useState<BankData[]>([]);
 
 
     const [methodPayment, setMethodCategory] = useState('');
@@ -658,7 +668,15 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
     //@_____________________Get  link banks _________________________
 
-    
+    useEffect(() => {
+        axios.get('https://bn.glassmountainbpo.com:8080/inventory/listBanks')
+            .then(res => {
+
+                // Filter data where supervisorBadge equals created_user
+                setBankData(res.data);
+
+            })
+    }, [sharedState, , created_user]); // Add userLevel and created_user to the dependency array
 
 
 
@@ -669,7 +687,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
     };
 
     const resetFields = () => {
-        setName('');
+        setNameBank('');
         setSupBadge('');
         setStatusActive('');
         setSupervisorName('');
@@ -682,7 +700,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
     const url2 = `https://bn.glassmountainbpo.com:8080/inventory/addBank`;
     const handleSubmit = async (e: React.FormEvent) => {
-        if (!name) {
+        if (!nameBank) {
             alert('Enter a valid category name')
         } else if (!statusActive) {
             alert('Enter a valid status!')
@@ -690,7 +708,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
             e.preventDefault()
             try {
                 const response = await axios.post(url2, {
-                    name,
+                    nameBank,
                     statusActive,
                     created_user,
                     methodPayment,
@@ -786,15 +804,51 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
 
     useEffect(() => {
-        if (methodPayment === 'BANK CHECK') {
-            setBankCheckPayment('');
-        } else if (methodPayment === 'ACCOUNT BANK NUMBER') {
-            setBankAccountNumber('');
-        } else if (methodPayment === '') {
-            setBankCheckPayment('');
-            setBankAccountNumber('');
-        }
-    }, [methodPayment]);
+
+        console.log('Nombre del bancoooo', nameBank);
+        // if (nameBank === 'BANK CHECK') {
+        //     setBankCheckPayment('');
+        // } else if (methodPayment === 'ACCOUNT BANK NUMBER') {
+        //     setBankAccountNumber('');
+        // } else if (methodPayment === '') {
+        //     setBankCheckPayment('');
+        //     setBankAccountNumber('');
+        // }
+    }, [nameBank]);
+
+
+    const [selectedBankId, setSelectedBankId] = useState<number | null>(null);
+
+    // Ejemplo de cómo podrías actualizar el estado con datos de una API o alguna fuente de datos
+
+
+    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedOption = e.target.options[e.target.selectedIndex];
+        const selectedId = selectedOption.getAttribute('data-id');
+        setNameBank(e.target.value);
+        setSelectedBankId(selectedId ? parseInt(selectedId, 10) : null);
+
+        console.log('este si el banco seleccionado : ', selectedBankId);
+
+        const filterData: any = bankData.filter((item: any) => item.id == selectedId);
+
+        setMethodCategory(filterData[0].method);
+        setAcountNumber(filterData[0].bank_account);
+        setBankCheck(filterData[0].bank_check);
+        console.log('estaaaa es el filtro de los bancos', filterData);
+    };
+
+
+
+    const [expandedRow, setExpandedRow] = useState(null);
+
+    const handleRowClick = (rowIndex: any) => {
+        console.log('Clicked row index: ', rowIndex)
+        setExpandedRow(rowIndex === expandedRow ? null : rowIndex);
+    };
+
+
+
 
 
     return (
@@ -807,147 +861,229 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
             </Button>
             <Modal onClose={() => setOpen(false)} show={isOpen}>
                 <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-                    <strong>Add new payroll</strong>
+                    <strong >Add new payroll</strong>
                 </Modal.Header>
                 <Modal.Body>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        {/* Personal Information Section */}
-                        <div className="col-span-1 sm:col-span-2">
-                            <strong className="text-gray-800 dark:text-gray-100">Personal Information</strong>
-                            <div className="col-span-1 sm:col-span-2 flex justify-center">
-                            <div className="relative bg-gray-100 rounded-xl" style={{ width: '125px', height: '115px', overflow: 'hidden', borderRadius: '7.5%' }}>
-                                <img
-                                    className="relative"
-                                    src={'https://hr.glassmountainbpo.com/ap/employee/document/foto/' + (!result.photo || result.photo === 'undefined' ? 'user.png' : result.photo)}
-                                    alt="user"
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                />
-                            </div>
-                        </div>
-                            <div className="mt-2">
-                                <Label className="text-gray-800 font-extrabold" htmlFor="badge">Badge</Label>
-                                <TextInput
-                                    className="mt-2"
-                                    id="badgeAddUser"
-                                    name="badgeAddUser"
-                                    placeholder="3814"
-                                    value={badge}
-                                    onChange={e => setBadge(e.target.value)}
-                                    onKeyDown={handleKeyPress}
-                                    required
-                                />
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <Label htmlFor="fullname">Full name</Label>
-                            <div className="mt-1">
-                                <TextInput
-                                    id="fullname"
-                                    name="fullname"
-                                    placeholder="John Doe"
-                                    value={result.fullname}
-                                    readOnly
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <Label htmlFor="position">Position</Label>
-                            <div className="mt-1">
-                                <TextInput
-                                    id="position"
-                                    name="position"
-                                    placeholder="Developer"
-                                    value={result ? result.name_job : ""}
-                                    readOnly
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <Label htmlFor="department">Department</Label>
-                            <div className="mt-1">
-                                <TextInput
-                                    id="department"
-                                    name="department"
-                                    placeholder="IT"
-                                    value={result ? result.name_rol : ""}
-                                    readOnly
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <Label htmlFor="name">Banks Available</Label>
-                            <div className="mt-1">
-                                <TextInput
-                                    id="name"
-                                    name="name"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    onKeyDown={handleKeyPress}
-                                />
-                            </div>
-                        </div>
 
-                        {/* Payment Information Section */}
-                        <div className="col-span-1 sm:col-span-2">
-                            <strong className="text-gray-800 dark:text-gray-100">Payment Information</strong>
-                            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex ">
+                        <Button className='bg-green-300' onClick={() => handleRowClick(0)}>
+                            <h2>+</h2>
+                        </Button>
+                        <strong className="text-gray-800 dark:text-gray-100 mt-2 ml-2">Personal Information</strong>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {expandedRow === 0 && (
+                            <>
+                                {/* Personal Information Section */}
+                                <div className="col-span-1 sm:col-span-2">
+
+                                    <div className="col-span-1 sm:col-span-2 flex justify-center">
+                                        <div className="relative bg-gray-100 rounded-xl" style={{ width: '125px', height: '115px', overflow: 'hidden', borderRadius: '7.5%' }}>
+                                            <img
+                                                className="relative"
+                                                src={'https://hr.glassmountainbpo.com/ap/employee/document/foto/' + (!result.photo || result.photo === 'undefined' ? 'user.png' : result.photo)}
+                                                alt="user"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="mt-2">
+                                        <Label className="text-gray-800 font-extrabold" htmlFor="badge">Badge</Label>
+                                        <TextInput
+                                            className="mt-2"
+                                            id="badgeAddUser"
+                                            name="badgeAddUser"
+                                            placeholder="3814"
+                                            value={badge}
+                                            onChange={e => setBadge(e.target.value)}
+                                            onKeyDown={handleKeyPress}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <Label htmlFor="methodPayment">Method Payment</Label>
+                                    <Label htmlFor="fullname">Full name</Label>
+                                    <div className="mt-1">
+                                        <TextInput
+                                            id="fullname"
+                                            name="fullname"
+                                            placeholder="John Doe"
+                                            value={result.fullname}
+                                            readOnly
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <Label htmlFor="position">Position</Label>
+                                    <div className="mt-1">
+                                        <TextInput
+                                            id="position"
+                                            name="position"
+                                            placeholder="Developer"
+                                            value={result ? result.name_job : ""}
+                                            readOnly
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <Label htmlFor="department">Department</Label>
+                                    <div className="mt-1">
+                                        <TextInput
+                                            id="department"
+                                            name="department"
+                                            placeholder="IT"
+                                            value={result ? result.name_rol : ""}
+                                            readOnly
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <Label htmlFor="name">Banks Available</Label>
                                     <div className="mt-1">
                                         <Select
-                                            id="methodPayment"
-                                            name="methodPayment"
-                                            onChange={(e) => setMethodCategory(e.target.value)}
+                                            id="name"
+                                            name="name"
+                                            value={nameBank}
+                                            onChange={handleSelectChange}
                                         >
-                                            <option value="">SELECTED</option>
-                                            <option value="BANK CHECK">BANK CHECK</option>
-                                            <option value="ACCOUNT BANK NUMBER">ACCOUNT BANK NUMBER</option>
+                                            <option value=''>--SELECTED--</option>
+                                            {bankData.sort((a, b) => a.name.localeCompare(b.name)).map((element) => (
+                                                <option key={element.id} value={element.name} data-id={element.id.toString()}>{element.name}</option>
+                                            ))}
+
                                         </Select>
                                     </div>
                                 </div>
-                                <div>
-                                    <Label htmlFor="check">Bank Check Payment</Label>
-                                    <div className="mt-1">
-                                        <TextInput
-                                            id="check"
-                                            name="check"
-                                            value={bankCheckPayment}
-                                            onChange={(e) => {
-                                                if (methodPayment !== 'ACCOUNT BANK NUMBER' && methodPayment !== '') {
-                                                    setBankCheckPayment('BANK CHECK');
-                                                    setBankAccountNumber('');
-                                                }
-                                            }}
-                                            readOnly={methodPayment === 'ACCOUNT BANK NUMBER' || methodPayment === ''}
-                                            disabled={methodPayment === 'ACCOUNT BANK NUMBER' || methodPayment === ''}
-                                        />
+                            </>
+                        )}
+
+                        {/* Payment Information Section */}
+                        <div className="col-span-1 sm:col-span-2">
+
+                            <div className="flex mt-3">
+                                <Button className='bg-green-300' onClick={() => handleRowClick(3)}>
+                                    <h2>+</h2>
+                                </Button>
+                                <strong className="text-gray-800 dark:text-gray-100 mt-3 ml-2">Payment Information</strong>
+                            </div>
+
+                            {expandedRow === 3 && (<>
+
+                                <div className=" mt-2 grid grid-cols-1 sm:grid-cols-1 gap-1">
+                                    <div>
+
+                                        <Alert color="success" className="mt-1" >
+                                            Method Payment: {methodPayment}<br></br>
+                                            <span></span>
+                                        </Alert>
                                     </div>
+                                    <div>
+                                        <div className="mt-">
+
+                                            <Alert className="mt- bg-black-500" color="success">
+                                                Bank Account Number: {acountNumber}<br></br>
+                                                <span></span>
+                                            </Alert>
+                                        </div>
+
+                                    </div>
+
                                 </div>
-                                <div>
-                                    <Label htmlFor="bank">Bank Account Number</Label>
-                                    <div className="mt-1">
-                                        <TextInput
-                                            id="bank"
-                                            name="bank"
-                                            value={bankAccountNumber}
-                                            onChange={(e) => {
-                                                if (methodPayment !== 'BANK CHECK' && methodPayment !== '') {
-                                                    setBankAccountNumber(e.target.value);
-                                                    setBankCheckPayment('');
-                                                }
-                                            }}
-                                            readOnly={methodPayment === 'BANK CHECK' || methodPayment === ''}
-                                            disabled={methodPayment === 'BANK CHECK' || methodPayment === ''}
-                                        />
+
+                            </>)}
+
+                        </div>
+
+                        {/* Payment due */}
+
+                        <div className="col-span-1 sm:col-span-2">
+                            <div className="flex">
+                                <Button className='bg-green-300' onClick={() => handleRowClick(1)}>
+                                    <h2>+</h2>
+                                </Button>
+                                <strong className="text-gray-800 dark:text-gray-100 mt-2 ml-2">Credit information</strong>
+                            </div>
+                            <div>
+                                {expandedRow === 1 && (
+                                    <div>
+                                        <div className="mt-2">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div>
+                                                    <Label htmlFor="status">Status</Label>
+                                                    <div className="mt-1">
+                                                        <Select
+                                                            id="status"
+                                                            name="status"
+                                                            value={statusActive}
+                                                            onChange={(e) => setStatusActive(e.target.value)}
+                                                        >
+                                                            <option value="">Selected</option>
+                                                            <option value="1">Active</option>
+                                                            <option value="0">Inactive</option>
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <Label htmlFor="adminUser">Admin User</Label>
+                                                    <div className="mt-1">
+                                                        <TextInput
+                                                            id="supBadge"
+                                                            name="supBadge"
+                                                            placeholder="3814"
+                                                            value={created_user}
+                                                            onChange={(e) => setSupBadge(e.target.value)}
+                                                            onKeyDown={handleKeyPress}
+                                                            required
+                                                            readOnly
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                   </div>
+                                )}
+                            </div>
+                            <div className="mt-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <Label htmlFor="status">Status</Label>
+                                        <div className="mt-1">
+                                            <Select
+                                                id="status"
+                                                name="status"
+                                                value={statusActive}
+                                                onChange={(e) => setStatusActive(e.target.value)}
+                                            >
+                                                <option value="">Selected</option>
+                                                <option value="1">Active</option>
+                                                <option value="0">Inactive</option>
+                                            </Select>
+
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="adminUser">Admin User</Label>
+                                        <div className="mt-1">
+                                            <TextInput
+                                                id="supBadge"
+                                                name="supBadge"
+                                                placeholder="3814"
+                                                value={created_user}
+                                                onChange={(e) => setSupBadge(e.target.value)}
+                                                onKeyDown={handleKeyPress}
+                                                required
+                                                readOnly
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         {/* User Status Section */}
+
                         <div className="col-span-1 sm:col-span-2">
                             <strong className="text-gray-800 dark:text-gray-100">User Status</strong>
                             <div className="mt-2">
@@ -965,6 +1101,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                                                 <option value="1">Active</option>
                                                 <option value="0">Inactive</option>
                                             </Select>
+
                                         </div>
                                     </div>
                                     <div>
