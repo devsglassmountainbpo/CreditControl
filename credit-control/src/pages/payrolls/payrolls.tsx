@@ -26,6 +26,16 @@ import UAParser from 'ua-parser-js';
 import * as XLSX from 'xlsx';
 
 
+import { HiIdentification } from "react-icons/hi";
+import { HiCreditCard } from "react-icons/hi";
+import { HiOutlineCurrencyDollar } from "react-icons/hi";
+import { HiOutlineUserCircle } from "react-icons/hi";
+
+
+
+
+
+
 
 
 const created_user3 = localStorage.getItem("badgeSession") || "";
@@ -867,7 +877,8 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
                     <div className="flex ">
                         <Button className='bg-green-300' onClick={() => handleRowClick(0)}>
-                            <h2>+</h2>
+                            < HiIdentification className="text-2xl" />
+
                         </Button>
                         <strong className="text-gray-800 dark:text-gray-100 mt-2 ml-2">Personal Information</strong>
                     </div>
@@ -965,7 +976,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
                             <div className="flex mt-3">
                                 <Button className='bg-green-300' onClick={() => handleRowClick(3)}>
-                                    <h2>+</h2>
+                                    < HiCreditCard className="text-2xl" />
                                 </Button>
                                 <strong className="text-gray-800 dark:text-gray-100 mt-3 ml-2">Payment Information</strong>
                             </div>
@@ -1002,7 +1013,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                         <div className="col-span-1 sm:col-span-2">
                             <div className="flex">
                                 <Button className='bg-green-300' onClick={() => handleRowClick(1)}>
-                                    <h2>+</h2>
+                                    <HiOutlineCurrencyDollar className="text-2xl" />
                                 </Button>
                                 <strong className="text-gray-800 dark:text-gray-100 mt-2 ml-2">Credit information</strong>
                             </div>
@@ -1043,83 +1054,37 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                                                 </div>
                                             </div>
                                         </div>
-                                   </div>
+                                    </div>
                                 )}
                             </div>
-                            <div className="mt-2">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <Label htmlFor="status">Status</Label>
-                                        <div className="mt-1">
-                                            <Select
-                                                id="status"
-                                                name="status"
-                                                value={statusActive}
-                                                onChange={(e) => setStatusActive(e.target.value)}
-                                            >
-                                                <option value="">Selected</option>
-                                                <option value="1">Active</option>
-                                                <option value="0">Inactive</option>
-                                            </Select>
 
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="adminUser">Admin User</Label>
-                                        <div className="mt-1">
-                                            <TextInput
-                                                id="supBadge"
-                                                name="supBadge"
-                                                placeholder="3814"
-                                                value={created_user}
-                                                onChange={(e) => setSupBadge(e.target.value)}
-                                                onKeyDown={handleKeyPress}
-                                                required
-                                                readOnly
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                         {/* User Status Section */}
 
                         <div className="col-span-1 sm:col-span-2">
-                            <strong className="text-gray-800 dark:text-gray-100">User Status</strong>
+                            {/* <strong className="text-gray-800 dark:text-gray-100">User Status</strong> */}
+                            <div className="flex">
+                                <Button className='bg-green-300' onClick={() => handleRowClick(4)}>
+                                    <HiOutlineUserCircle className="text-2xl" />
+                                </Button>
+                                <strong className="text-gray-800 dark:text-gray-100 mt-2 ml-2">Created by user</strong>
+                            </div>
                             <div className="mt-2">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <Label htmlFor="status">Status</Label>
-                                        <div className="mt-1">
-                                            <Select
-                                                id="status"
-                                                name="status"
-                                                value={statusActive}
-                                                onChange={(e) => setStatusActive(e.target.value)}
-                                            >
-                                                <option value="">Selected</option>
-                                                <option value="1">Active</option>
-                                                <option value="0">Inactive</option>
-                                            </Select>
+                                {expandedRow === 4 && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-1 gap-1">
+                                        <div>
+                                            <div className="mt-1">
 
+                                                <Alert className="items-center text-3xl font-extrabold" 
+                                                >
+                                            <Label htmlFor="status" className="mr-2 dark:text-indigo-500 font-extrabold">Badge:</Label>
+                                                    {created_user}
+                                                </Alert>
+                                            </div>
                                         </div>
+
                                     </div>
-                                    <div>
-                                        <Label htmlFor="adminUser">Admin User</Label>
-                                        <div className="mt-1">
-                                            <TextInput
-                                                id="supBadge"
-                                                name="supBadge"
-                                                placeholder="3814"
-                                                value={created_user}
-                                                onChange={(e) => setSupBadge(e.target.value)}
-                                                onKeyDown={handleKeyPress}
-                                                required
-                                                readOnly
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>
