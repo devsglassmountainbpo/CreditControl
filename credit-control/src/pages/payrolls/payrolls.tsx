@@ -26,13 +26,11 @@ import UAParser from 'ua-parser-js';
 import * as XLSX from 'xlsx';
 
 
+
 import { HiIdentification } from "react-icons/hi";
 import { HiCreditCard } from "react-icons/hi";
 import { HiOutlineCurrencyDollar } from "react-icons/hi";
 import { HiOutlineUserCircle } from "react-icons/hi";
-
-
-
 
 
 
@@ -869,7 +867,8 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                     Add Payrolls
                 </div>
             </Button>
-            <Modal onClose={() => setOpen(false)} show={isOpen}>
+
+            <Modal onClose={() => setOpen(false)} show={isOpen} >
                 <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
                     <strong >Add new payroll</strong>
                 </Modal.Header>
@@ -877,10 +876,18 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
                     <div className="flex ">
                         <Button className='bg-green-300' onClick={() => handleRowClick(0)}>
-                            < HiIdentification className="text-2xl" />
+
+                            {
+                                expandedRow == 0 ?
+
+                                    < HiIdentification className="text-2xl" />
+                                    :
+                                    < HiIdentification className="text-1xl" />
+
+                            }
 
                         </Button>
-                        <strong className="text-gray-800 dark:text-gray-100 mt-2 ml-2">Personal Information</strong>
+                        <Label className="text-gray-800 dark:text-gray-100 mt-2 ml-2 font-semibold">Personal Information</Label>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         {expandedRow === 0 && (
@@ -976,9 +983,15 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
                             <div className="flex mt-3">
                                 <Button className='bg-green-300' onClick={() => handleRowClick(3)}>
-                                    < HiCreditCard className="text-2xl" />
+
+                                    {expandedRow == 3 ?
+                                        < HiCreditCard className="text-2xl" />
+                                        :
+                                        < HiCreditCard className="text-1xl" />
+
+                                    }
                                 </Button>
-                                <strong className="text-gray-800 dark:text-gray-100 mt-3 ml-2">Payment Information</strong>
+                                <Label className="text-gray-800 dark:text-gray-100 mt-3 ml-2 font-semibold">Payment Information</Label>
                             </div>
 
                             {expandedRow === 3 && (<>
@@ -1012,10 +1025,19 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
                         <div className="col-span-1 sm:col-span-2">
                             <div className="flex">
-                                <Button className='bg-green-300' onClick={() => handleRowClick(1)}>
-                                    <HiOutlineCurrencyDollar className="text-2xl" />
-                                </Button>
-                                <strong className="text-gray-800 dark:text-gray-100 mt-2 ml-2">Credit information</strong>
+
+                                {expandedRow == 1 ?
+
+                                    <Button className='bg-green-300' onClick={() => handleRowClick(1)}>
+                                        <HiOutlineCurrencyDollar className="text-2xl" />
+                                    </Button>
+                                    :
+                                    <Button className='bg-green-300' onClick={() => handleRowClick(1)}>
+                                        <HiOutlineCurrencyDollar className="text-1xl" />
+                                    </Button>
+
+                                }
+                                <Label className="text-gray-800 dark:text-gray-100 mt-2 ml-2 font-semibold">Credit information</Label>
                             </div>
                             <div>
                                 {expandedRow === 1 && (
@@ -1023,32 +1045,57 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                                         <div className="mt-2">
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
-                                                    <Label htmlFor="status">Status</Label>
+                                                    <Label htmlFor="status">Total Credit</Label>
                                                     <div className="mt-1">
-                                                        <Select
-                                                            id="status"
-                                                            name="status"
-                                                            value={statusActive}
+                                                        <TextInput
+
                                                             onChange={(e) => setStatusActive(e.target.value)}
+                                                            required
                                                         >
-                                                            <option value="">Selected</option>
-                                                            <option value="1">Active</option>
-                                                            <option value="0">Inactive</option>
-                                                        </Select>
+
+                                                        </TextInput>
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <Label htmlFor="adminUser">Admin User</Label>
+                                                    <Label htmlFor="adminUser">Total per installment</Label>
                                                     <div className="mt-1">
                                                         <TextInput
                                                             id="supBadge"
                                                             name="supBadge"
                                                             placeholder="3814"
-                                                            value={created_user}
                                                             onChange={(e) => setSupBadge(e.target.value)}
-                                                            onKeyDown={handleKeyPress}
                                                             required
-                                                            readOnly
+
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div className="mt-2">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div>
+                                                    <Label htmlFor="status">Credit Start Date</Label>
+                                                    <div className="mt-1">
+                                                        <TextInput
+                                                            type='date'
+                                                            onChange={(e: any) => setStatusActive(e.target.value)}
+                                                            required
+                                                        >
+
+                                                        </TextInput>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <Label htmlFor="adminUser">Credit End Date</Label>
+                                                    <div className="mt-1">
+                                                        <TextInput
+
+                                                            type="date"
+                                                            onChange={(e: any) => setSupBadge(e.target.value)}
+                                                            required
+
                                                         />
                                                     </div>
                                                 </div>
@@ -1065,9 +1112,14 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                             {/* <strong className="text-gray-800 dark:text-gray-100">User Status</strong> */}
                             <div className="flex">
                                 <Button className='bg-green-300' onClick={() => handleRowClick(4)}>
-                                    <HiOutlineUserCircle className="text-2xl" />
+                                    {expandedRow == 4 ?
+
+                                        <HiOutlineUserCircle className="text-2xl" />
+                                        :
+                                        <HiOutlineUserCircle className="text-1xl" />
+                                    }
                                 </Button>
-                                <strong className="text-gray-800 dark:text-gray-100 mt-2 ml-2">Created by user</strong>
+                                <Label className="text-gray-800 dark:text-gray-100 mt-2 ml-2 font-semibold">Created by user</Label>
                             </div>
                             <div className="mt-2">
                                 {expandedRow === 4 && (
@@ -1075,9 +1127,9 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                                         <div>
                                             <div className="mt-1">
 
-                                                <Alert className="items-center text-3xl font-extrabold" 
+                                                <Alert className="items-center text-3xl font-extrabold"
                                                 >
-                                            <Label htmlFor="status" className="mr-2 dark:text-indigo-500 font-extrabold">Badge:</Label>
+                                                    <Label htmlFor="status" className="mr-2 dark:text-indigo-500 font-extrabold">Badge:</Label>
                                                     {created_user}
                                                 </Alert>
                                             </div>
@@ -1350,7 +1402,7 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
             <Button className="bg-yellow-300 hover:bg-yellow-400" onClick={() => { setOpen(true) }}>   <HiTable className="text-xl"></HiTable></Button>
             <Modal onClose={() => setOpen(false)} show={isOpen} className="w-full sm:grid-cols-3">
                 <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700 text-gray-200">
-                    <strong>Payment management!</strong>
+                    <Label>Payment management!</Label>
                 </Modal.Header>
                 <Modal.Body>
                     {/*      
