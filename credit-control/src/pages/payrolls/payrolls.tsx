@@ -21,7 +21,7 @@ import NavbarSidebarLayout2 from "../../layouts/navbar-sidebar2";
 import axios from "axios";
 import CryptoJS from "crypto-js";
 import { utils, writeFile } from 'xlsx-js-style';
-import { FiletypeCsv, FiletypeXlsx } from 'react-bootstrap-icons';
+import { Calendar, Calendar2Date, Calendar2DateFill, FiletypeCsv, FiletypeXlsx, Icon0Circle } from 'react-bootstrap-icons';
 import UAParser from 'ua-parser-js';
 import * as XLSX from 'xlsx';
 
@@ -635,10 +635,85 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
     const [nameBank, setNameBank] = useState('');
     const [badge, setBadge] = useState<any>(''); //Badge
 
-    const [statusActive, setStatusActive] = useState('');
+    //credit personal information
+    const [credit, setCredit] = useState('');
+    const [totaInstallment, setTotalInstallment] = useState('');
+
+    //DataTime Collection
+    const [credit_start, setCreditStart] = useState('');
+    const [credit_end, setCreditEnd] = useState('');
+
+
+    const [formattedDate, setFormattedDate] = useState(''); // Fecha formateada
+    const [paymentDates, setPaymentDates] = useState<string[]>([]); // Fechas de pago
 
     const [acountNumber, setAcountNumber] = useState('');
     const [bankCheck, setBankCheck] = useState('');
+
+
+
+
+    console.log('fechas de calculo de cuotas', credit_start, credit_end)
+    console.log('Credit personal information', totaInstallment, credit)
+
+
+
+
+    useEffect(() => {
+        console.log('Recibimos el date_created', credit_start);
+
+        const formatDate = (dateString: string): string => {
+            const date = new Date(dateString);
+            const formattedYear = date.getUTCFullYear();
+            const formattedMonth = String(date.getUTCMonth() + 1).padStart(2, '0');
+            const formattedDay = String(date.getUTCDate()).padStart(2, '0');
+            const formattedHours = String(date.getUTCHours()).padStart(2, '0');
+            const formattedMinutes = String(date.getUTCMinutes()).padStart(2, '0');
+            const formattedSeconds = String(date.getUTCSeconds()).padStart(2, '0');
+
+            return `${formattedYear}-${formattedMonth}-${formattedDay} ${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+        };
+
+        const generatePaymentDates = (startDate: string, totalInstallments: any): string[] => {
+            const startDateObj = new Date(startDate);
+            const paymentDates: string[] = [];
+
+            for (let i = 0; i < totalInstallments; i++) {
+                let paymentDate = new Date(startDateObj.getFullYear(), startDateObj.getMonth() + i, 14);
+                paymentDates.push(formatDate(paymentDate.toISOString()));
+
+                paymentDate = new Date(startDateObj.getFullYear(), startDateObj.getMonth() + i + 1, 0);
+                paymentDate.setDate(paymentDate.getDate() - 2);
+                paymentDates.push(formatDate(paymentDate.toISOString()));
+            }
+
+            return paymentDates;
+        };
+
+        const formatted: any = formatDate(credit_start);
+        setFormattedDate(formatted); // Actualizar la fecha formateada en estado
+
+        // Asegurarse de que la fecha formateada está actualizada antes de generar las fechas de pago
+        const allDatesInstallment: any = generatePaymentDates(formatted, totaInstallment);
+        setPaymentDates(allDatesInstallment); // Establecer las fechas de pago en el estado
+
+
+        setCreditEnd(paymentDates[paymentDates.length - 1]); // Establece la última fecha de pago
+
+    }, [credit_start, totaInstallment]); // Dependencias del useEffect
+
+
+
+    //Definiendos las cuotas
+
+
+
+    console.log('como transformamos del start date', formattedDate, credit, totaInstallment);
+    console.log('total de cuotas a cancelar', paymentDates);
+
+
+
+
 
 
     // Bank Check Payment
@@ -697,7 +772,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
     const resetFields = () => {
         setNameBank('');
         setSupBadge('');
-        setStatusActive('');
+        setCredit('');
         setSupervisorName('');
     };
 
@@ -710,14 +785,14 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
     const handleSubmit = async (e: React.FormEvent) => {
         if (!nameBank) {
             alert('Enter a valid category name')
-        } else if (!statusActive) {
+        } else if (!credit) {
             alert('Enter a valid status!')
         } else {
             e.preventDefault()
             try {
                 const response = await axios.post(url2, {
                     nameBank,
-                    statusActive,
+                    credit,
                     created_user,
                     methodPayment,
                     bankCheckPayment,
@@ -854,7 +929,11 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
         console.log('Clicked row index: ', rowIndex)
         setExpandedRow(rowIndex === expandedRow ? null : rowIndex);
     };
-
+    const handleInputClick = () => {
+        if (credit_start === '') {
+            alert('Insert credit start date')
+        }
+    };
 
 
 
@@ -1048,59 +1127,79 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                                                     <Label htmlFor="status">Total Credit</Label>
                                                     <div className="mt-1">
                                                         <TextInput
-
-                                                            onChange={(e) => setStatusActive(e.target.value)}
+                                                            value={credit}
+                                                            onChange={(e) => setCredit(e.target.value)}
                                                             required
                                                         >
 
                                                         </TextInput>
                                                     </div>
                                                 </div>
+                                                <div>
+                                                    <Label htmlFor="status">Credit Start Date</Label>
+                                                    <div className="mt-1">
+                                                        <TextInput
+                                                            type='date'
+
+                                                            onChange={(e: any) => setCreditStart(e.target.value)}
+                                                            required
+                                                        >
+                                                        </TextInput>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
                                                     <Label htmlFor="adminUser">Total per installment</Label>
                                                     <div className="mt-1">
                                                         <TextInput
                                                             id="supBadge"
                                                             name="supBadge"
-                                                            placeholder="3814"
-                                                            onChange={(e) => setSupBadge(e.target.value)}
-                                                            required
+                                                            placeholder=""
+                                                            value={totaInstallment}
 
+                                                            onChange={(e) => setTotalInstallment(e.target.value)}
+                                                            onClick={handleInputClick}
+                                                            readOnly={credit_start == ''}
+                                                            required
                                                         />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-                                        <div className="mt-2">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                <div>
-                                                    <Label htmlFor="status">Credit Start Date</Label>
-                                                    <div className="mt-1">
-                                                        <TextInput
-                                                            type='date'
-                                                            onChange={(e: any) => setStatusActive(e.target.value)}
-                                                            required
-                                                        >
-
-                                                        </TextInput>
                                                     </div>
                                                 </div>
                                                 <div>
                                                     <Label htmlFor="adminUser">Credit End Date</Label>
                                                     <div className="mt-1">
                                                         <TextInput
-
-                                                            type="date"
-                                                            onChange={(e: any) => setSupBadge(e.target.value)}
+                                                            value={paymentDates[paymentDates.length - 1] || ''}
+                                                            type="text"
+                                                            readOnly
                                                             required
-
                                                         />
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        <div className="flex bg-primary-500 rounded mt-4 p-4">
+                                            <h1 className="text-white mx-2">Payment Dates Timeline</h1>
+                                            {paymentDates.length > 0 && (
+                                                <div className="flex-grow border-t border-white">
+                                                    <div className="flex justify-between items-center">
+                                                        <div className="text-white text-center p-2 bg-yellow-300 rounded">
+                                                            <Calendar /><span>Start Date: {paymentDates[0]}</span>
+                                                        </div>
+                                                        {paymentDates.length > 1 && (
+                                                            <div className="text-white text-center p-2 bg-green-400 rounded">
+                                                                <Calendar /><span>End Date: {paymentDates[paymentDates.length - 1]}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
                                     </div>
                                 )}
                             </div>
