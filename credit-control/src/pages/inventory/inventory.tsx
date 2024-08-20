@@ -3,7 +3,7 @@
 import { Label, Table, TextInput, Dropdown, Checkbox as FlowbiteCheckbox, Button, Modal, Select } from "flowbite-react";
 import React, { SetStateAction, useState, useEffect, type FC } from "react";
 import NavbarSidebarLayout2 from "../../layouts/navbar-sidebar2";
-import { InventoryItem, AssetItem, BrandItem, ModelItem, CategoryItem } from "../../types";
+import { InventoryItem, AssetItem, BrandItem, ModelItem, CategoryItem } from "../../types.ts";
 // @ts-ignore
 import { HiDocumentDownload, HiOutlinePencilAlt, HiPlus, HiFolderAdd, HiOutlineDotsVertical } from "react-icons/hi";
 import axios from "axios";

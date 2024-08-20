@@ -10,7 +10,7 @@ interface EditDetailsAssetModalProps {
     model: string;
     quantity: number;
     created_user: string;
-    id: string;
+    id: number;
     sharedState: boolean;
     updateSharedState: (value: boolean) => void;
 }
