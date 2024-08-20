@@ -1,10 +1,5 @@
 
-
 export const handleSortByLabel = (initialData: any[], key: string, sortDirection: string) => {
-
-    console.log('initialData', initialData);
-    console.log('key', key);
-    console.log('sortDirection', sortDirection);
     let sortedResults;
     switch(key) {
         case 'id':

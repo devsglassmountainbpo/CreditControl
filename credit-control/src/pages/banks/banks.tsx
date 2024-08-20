@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import {
     Button,
-    // Checkbox,
     Label,
     Modal,
     Select,
@@ -12,11 +11,8 @@ import {
 import type { FC } from "react";
 import { useEffect, useState, SetStateAction } from "react"
 import {
-    // HiChevronLeft,
-    // HiChevronRight,
     HiRefresh,
     HiDocumentDownload,
-    // HiOutlinePencilAlt,
     HiPlus,
     HiOutlinePencilAlt
 } from "react-icons/hi";
@@ -33,7 +29,6 @@ import UAParser from 'ua-parser-js';
 import CryptoJS from "crypto-js";
 
 import * as XLSX from 'xlsx';
-import { FaTags } from 'react-icons/fa'; // Ejemplo con FontAwesome
 
 import { HiLibrary } from "react-icons/hi";
 import { handleSortByLabel } from "../../hooks/HandleSortByLabel";
@@ -45,7 +40,6 @@ const created_user = (created_user2 ? created_user2.toString(CryptoJS.enc.Utf8) 
 
 const ArrayBagde = ['3199', '3814', '3897', '2181'];
 const condicion = ArrayBagde.includes(created_user) ? '1' : '0';
-console.log('========Esta es la condicion:', condicion);
 
 const userLevel3 = localStorage.getItem("userLevel") || "";
 const userLevel2 = (userLevel3 ? CryptoJS.AES.decrypt(userLevel3, "Tyrannosaurus") : "");
@@ -76,7 +70,6 @@ const BanksAll: FC = function () {
 
                 } else {
                     // If userLevel is not 2, set data as is
-                    console.log(res.data);
                     setData(res.data);
 
                 }
