@@ -6,10 +6,10 @@ import {
     TextInput,
     Button,
     Label, Badge,
-    Card, Alert, Accordion
+    Card, Alert
 } from "flowbite-react";
 import type { FC, JSXElementConstructor, Key, ReactElement, ReactFragment, ReactPortal } from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { HiTable } from "react-icons/hi";
 import {
@@ -258,14 +258,13 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
 
                         <Table.Body>
                             {dataGraphis.map((row: any, rowIndex: any) => (
-                                <>
+                                <React.Fragment key={rowIndex}>
                                     <Table.Row
-                                        key={rowIndex}
                                         className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-white"
                                         onClick={() => handleRowClick(rowIndex, row)}
                                     >
-                                        {columnOrder.map((key) => (
-                                            <Table.Cell key={key} className="py-4 px-6 font-semibold">
+                                        {columnOrder.map((key, index) => (
+                                            <Table.Cell key={index} className="py-4 px-6 font-semibold">
 
                                                 {typeof row[key] === 'number' && row[key] <= 30 ? (
                                                     <>
@@ -317,7 +316,7 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
                                             </Table.Cell>
                                         </Table.Row>
                                     )}
-                                </>
+                                </React.Fragment>
                             ))}
                         </Table.Body>
 
@@ -376,6 +375,7 @@ const Component = function (data: any) {
     }, []);
 
     const filteredData = dataGraphis.filter(user => user.id_bank == idFilter);
+    console.log(idFilter);
 
     console.log('Un dolor de cabeza menos :D', filteredData);
 

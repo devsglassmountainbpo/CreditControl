@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import {
     Button,
-    // Checkbox,
     Label,
     Modal,
     Select,
@@ -12,11 +11,8 @@ import {
 import type { FC } from "react";
 import { useEffect, useState, SetStateAction } from "react"
 import {
-    // HiChevronLeft,
-    // HiChevronRight,
     HiRefresh,
     HiDocumentDownload,
-    // HiOutlinePencilAlt,
     HiPlus,
     HiOutlinePencilAlt
 } from "react-icons/hi";
@@ -33,9 +29,9 @@ import UAParser from 'ua-parser-js';
 import CryptoJS from "crypto-js";
 
 import * as XLSX from 'xlsx';
-import { FaTags } from 'react-icons/fa'; // Ejemplo con FontAwesome
 
 import { HiLibrary } from "react-icons/hi";
+import { handleSortByLabel } from "../../hooks/HandleSortByLabel";
 
 
 const created_user3 = localStorage.getItem("badgeSession") || "";
@@ -44,7 +40,6 @@ const created_user = (created_user2 ? created_user2.toString(CryptoJS.enc.Utf8) 
 
 const ArrayBagde = ['3199', '3814', '3897', '2181'];
 const condicion = ArrayBagde.includes(created_user) ? '1' : '0';
-console.log('========Esta es la condicion:', condicion);
 
 const userLevel3 = localStorage.getItem("userLevel") || "";
 const userLevel2 = (userLevel3 ? CryptoJS.AES.decrypt(userLevel3, "Tyrannosaurus") : "");
@@ -56,8 +51,9 @@ const BanksAll: FC = function () {
     const [data, setData] = useState([] as any[]);
     let [filteredResults, setFilteredResults] = useState([] as any[]);
     let [dataTemp, setDataTemp] = useState([] as any[]);
-
+    const [sortKey, setSortKey] = useState('id');
     const [sharedState, setSharedState] = useState(false);
+    const [sortDirection, setSortDirection] = useState('asc');
 
     const updateSharedState = (newValue: boolean) => {
 
@@ -139,16 +135,32 @@ const BanksAll: FC = function () {
     const paginate = (pageNumber: SetStateAction<number>) => setCurrentPage(pageNumber);
 
 
-    const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({
-        Available: false,
-        Delivered: false,
-        Assigned: false,
-    });
+    // const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({
+    //     Available: false,
+    //     Delivered: false,
+    //     Assigned: false,
+    // });
+
+    // useEffect(() => {
+    //     console.log('checkedItems ha cambiado:', checkedItems);
+
+    // }, [setCheckedItems]); // Depende de `checkedItems`
 
     useEffect(() => {
-        console.log('checkedItems ha cambiado:', checkedItems);
+        const initialData = [...data];
+        const dataFiltered = handleSortByLabel(initialData, sortKey, sortDirection);
+        setData(dataFiltered);
+    }, [sortKey, sortDirection]);
 
-    }, [setCheckedItems]); // Depende de `checkedItems`
+    const handleColumnSort = (key: string) => {
+        if (sortKey === key) {
+            setSortDirection(prevDirection => prevDirection === 'asc' ? 'desc' : 'asc');
+            return;
+        }
+        setSortKey(key);
+        setSortDirection('asc');
+
+    };
 
 
     return (
@@ -212,19 +224,17 @@ const BanksAll: FC = function () {
                         <div className="overflow-hidden shadow">
                             <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600" style={{ zoom: 0.85 }}>
                                 <Table.Head className="bg-gray-100 dark:bg-gray-700">
-
-                                    <Table.HeadCell className="">ID</Table.HeadCell>
-                                    <Table.HeadCell className="">Name</Table.HeadCell>
-                                    <Table.HeadCell className="hover:cursor-pointer hover:text-blue-500">Method payment</Table.HeadCell>
-                                    <Table.HeadCell className="hover:cursor-pointer hover:text-blue-500">Bank check payment</Table.HeadCell>
-                                    <Table.HeadCell className="hover:cursor-pointer hover:text-blue-500">Bank Account</Table.HeadCell>
-                                    <Table.HeadCell className="hover:cursor-pointer hover:text-blue-500">Status</Table.HeadCell>
-                                    <Table.HeadCell className="hover:cursor-pointer hover:text-blue-500">Date Created</Table.HeadCell>
+                                    <Table.HeadCell onClick={() => handleColumnSort('id')} className="">ID</Table.HeadCell>
+                                    <Table.HeadCell onClick={() => handleColumnSort('name')} className="hover:cursor-pointer hover:text-blue-500">Name</Table.HeadCell>
+                                    <Table.HeadCell onClick={() => handleColumnSort('method')} className="hover:cursor-pointer hover:text-blue-500">Method payment</Table.HeadCell>
+                                    <Table.HeadCell onClick={() => handleColumnSort('bank_check')} className="hover:cursor-pointer hover:text-blue-500">Bank check payment</Table.HeadCell>
+                                    <Table.HeadCell onClick={() => handleColumnSort('bank_account')} className="hover:cursor-pointer hover:text-blue-500">Bank Account</Table.HeadCell>
+                                    <Table.HeadCell onClick={() => handleColumnSort('status')} className="hover:cursor-pointer hover:text-blue-500">Status</Table.HeadCell>
+                                    <Table.HeadCell onClick={() => handleColumnSort('date_created')} className="hover:cursor-pointer hover:text-blue-500">Date Created</Table.HeadCell>
 
                                     {condicion == '1' ? <>
                                         <Table.HeadCell>Actions</Table.HeadCell>
                                     </> : <Table.HeadCell></Table.HeadCell>}
-
                                 </Table.Head>
                                 <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                                     {
@@ -650,7 +660,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                                     id="check"
                                     name="check"
                                     value={bankCheckPayment}
-                                    onChange={(e) => {
+                                    onChange={() => {
                                         if (methodPayment !== 'ACCOUNT BANK NUMBER' && methodPayment !== '') {
                                             setBankCheckPayment('BANK CHECK');
                                             setBankAccountNumber('');
@@ -746,7 +756,7 @@ const EditUserModal: FC<any> = function ({ id, active, name, sharedState, update
 
     const handleSubmit = async (e: React.FormEvent) => {
 
-        if (status == ''){
+        if (status == '') {
             alert('Select a state')
         }
         e.preventDefault()
