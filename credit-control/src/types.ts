@@ -38,3 +38,21 @@ export interface CategoryItem {
     id: number;
     name: string;
 }
+
+
+export type CreditRecord = {
+    id: number;
+    name_: string;
+    badge: string;
+    reference_number: string;
+    credit_total: string;
+    total_payment: number;
+    credit_start_date: string;
+    credit_end_date: string;
+    id_bank: number;
+    date_created: string;
+    status_credit: string;
+    photo?: string;
+    name_bank?: string;
+    due?: string;
+};

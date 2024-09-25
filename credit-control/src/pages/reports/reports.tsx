@@ -34,7 +34,7 @@ const AllReports: FC = function () {
 
     const [isOpen, setOpen] = useState(false);
 
-    const url = `https://bn.glassmountainbpo.com:8080/vendors/hired/`;
+    const url = `https://bn.glassmountainbpo.com:8080/test/vendors/hired/`;
 
     const [result, setResult] = useState<any>([]); //JSON Axios Data
     const [badge, setBadge] = useState<any>(''); //Badge
@@ -63,9 +63,9 @@ const AllReports: FC = function () {
         e.preventDefault();
         let reportUrl = '';
         if (report === 'Payroll') {
-            reportUrl = `https://bn.glassmountainbpo.com:8080/creditControl/reportOne/${badge}`;
+            reportUrl = `https://bn.glassmountainbpo.com:8080/test/creditControl/reportOne/${badge}`;
         } else if (report === 'Payment') {
-            reportUrl = `https://bn.glassmountainbpo.com:8080/creditControl/reportTwo/${badge}`;
+            reportUrl = `https://bn.glassmountainbpo.com:8080/test/creditControl/reportTwo/${badge}`;
         }
 
         try {

@@ -108,7 +108,7 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
         const fetchData = async () => {
             try {
                 const [graphisRes] = await Promise.all([
-                    axios.get('https://bn.glassmountainbpo.com:8080/credit/payments'),
+                    axios.get('https://bn.glassmountainbpo.com:8080/test/credit/payments'),
                 ]);
                 setDataGraphis(graphisRes.data);
             } catch (error) {
@@ -123,7 +123,7 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
         const fetchData3 = async () => {
             try {
                 const [dataPayroll] = await Promise.all([
-                    axios.get('https://bn.glassmountainbpo.com:8080/credit/list_payrolls'),
+                    axios.get('https://bn.glassmountainbpo.com:8080/test/credit/list_payrolls'),
                 ]);
                 setFiltrado(dataPayroll.data);
             } catch (error) {
@@ -360,7 +360,7 @@ const Component = function (data: any) {
         const fetchData = async () => {
             try {
                 const [graphisRes] = await Promise.all([
-                    axios.get('https://bn.glassmountainbpo.com:8080/credit/list_payrolls'),
+                    axios.get('https://bn.glassmountainbpo.com:8080/test/credit/list_payrolls'),
                 ]);
 
                 setDataGraphis(graphisRes.data);
@@ -734,7 +734,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
     console.log('estas son la categorias seleccionadas', methodPayment)
 
-    const url = `https://bn.glassmountainbpo.com:8080/api/hired_fullname/`;
+    const url = `https://bn.glassmountainbpo.com:8080/test/api/hired_fullname/`;
 
     const handleTrack = () => {
         if (badge.length !== 0) {
@@ -752,7 +752,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
     //@_____________________Get  link banks _________________________
 
     useEffect(() => {
-        axios.get('https://bn.glassmountainbpo.com:8080/inventory/listBanks')
+        axios.get('https://bn.glassmountainbpo.com:8080/test/inventory/listBanks')
             .then(res => {
 
                 // Filter data where supervisorBadge equals created_user
@@ -781,7 +781,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
 
 
-    const url2 = `https://bn.glassmountainbpo.com:8080/inventory/addBank`;
+    const url2 = `https://bn.glassmountainbpo.com:8080/test/inventory/addBank`;
     const handleSubmit = async (e: React.FormEvent) => {
         if (!nameBank) {
             alert('Enter a valid category name')
@@ -874,7 +874,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
     const [dataInternal, setDataInternal] = useState([] as any[]);
 
     useEffect(() => {
-        axios.get('https://bn.glassmountainbpo.com:8080/inventory/listCategory')
+        axios.get('https://bn.glassmountainbpo.com:8080/test/inventory/listCategory')
             .then(res => {
                 // If userLevel is not 2, set data as is
                 const filteredData = res.data.filter((item: { active: number; }) => item.active == 1);
@@ -1285,7 +1285,7 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
     console.log('esto es nuestro recurso', data)
 
 
-    const urlHired = `https://bn.glassmountainbpo.com:8080/api/hired/`;
+    const urlHired = `https://bn.glassmountainbpo.com:8080/test/api/hired/`;
 
     const handleTrack = () => {
         if (supBadge.length !== 0) {
@@ -1321,7 +1321,7 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
 
 
 
-    const url2 = `https://bn.glassmountainbpo.com:8080/inventory/addBank`;
+    const url2 = `https://bn.glassmountainbpo.com:8080/test/inventory/addBank`;
     // const handleSubmit = async (e: React.FormEvent) => {
     //     if (!name) {
     //         alert('Enter a valid category name')
@@ -1364,7 +1364,7 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
         e.preventDefault();
         let reportUrl = '';
 
-        reportUrl = `https://bn.glassmountainbpo.com:8080/creditControl/reportTwo/${data[0].badge}`;
+        reportUrl = `https://bn.glassmountainbpo.com:8080/test/creditControl/reportTwo/${data[0].badge}`;
 
         try {
             const response = await axios.get(reportUrl);
@@ -1380,7 +1380,7 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
     const handleSubmit2 = async (e: any) => {
         e.preventDefault();
         let reportUrl = '';
-        reportUrl = `https://bn.glassmountainbpo.com:8080/creditControl/reportOne/${data[0].badge}`;
+        reportUrl = `https://bn.glassmountainbpo.com:8080/test/creditControl/reportOne/${data[0].badge}`;
         try {
             const response = await axios.get(reportUrl);
             const data = response.data;
@@ -1465,7 +1465,7 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
     const [dataInternal, setDataInternal] = useState([] as any[]);
 
     useEffect(() => {
-        axios.get('https://bn.glassmountainbpo.com:8080/inventory/listCategory')
+        axios.get('https://bn.glassmountainbpo.com:8080/test/inventory/listCategory')
             .then(res => {
                 // If userLevel is not 2, set data as is
                 const filteredData = res.data.filter((item: { active: number; }) => item.active == 1);
@@ -1651,7 +1651,7 @@ const ExportModal: FC<any> = function (rawData) {
         const fetchData = async () => {
             try {
                 const [graphisRes] = await Promise.all([
-                    axios.get('https://bn.glassmountainbpo.com:8080/credit/list_payrolls'),
+                    axios.get('https://bn.glassmountainbpo.com:8080/test/credit/list_payrolls'),
                 ]);
 
                 setDataGraphis(graphisRes.data);

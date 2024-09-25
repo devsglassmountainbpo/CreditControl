@@ -13,8 +13,11 @@ import UserListPage from "./pages/users/Users";
 import AllReports from "./pages/reports/reports";
 import BanksAll from "./pages/banks/banks";
 import PayrollAll from "./pages/payrolls/payrolls";
+import BankReports from "./pages/reports/BankReports";
 import Reports from "./pages/reports/reports"
 import { Navigate } from 'react-router-dom';
+import Defaults from "./pages/defaulters/defaults";
+
 const container = document.getElementById("root");
 
 if (!container) {
@@ -70,6 +73,15 @@ root.render(
           element={user ? <Reports /> : <Navigate to="/SignIn" />}
         />
 
+        <Route
+          path="/defaults"
+          element={user ? <Defaults /> : <Navigate to="/SignIn" />}
+        />
+
+        <Route
+          path="/bankReports"
+          element={user ? <BankReports /> : <Navigate to="/SignIn" />}
+        />
       </Routes>
 
     </BrowserRouter>

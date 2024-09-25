@@ -1,11 +1,10 @@
 import { useEffect, useState, type FC } from "react";
 import { UserToggle } from "../components/userToggle";
 import { DarkThemeToggle, Navbar } from "flowbite-react";
-import { FaTags, FaStream, FaBoxOpen, FaUsers, FaList } from 'react-icons/fa'; // Ejemplo con FontAwesome
+import { FaBoxOpen, FaUsers, FaList } from 'react-icons/fa'; // Ejemplo con FontAwesome
 
-import { FaClone } from "react-icons/fa";
 
-import { HiLibrary } from "react-icons/hi";
+import { HiCurrencyDollar, HiLibrary, HiOutlineDocumentText } from "react-icons/hi";
 
 
 
@@ -18,7 +17,7 @@ const ExampleNavbar: FC = function () {
     localStorage.setItem('activeLink', activeLink);
   }, [activeLink]);
 
-  const handleSetActiveLink = (link:any) => {
+  const handleSetActiveLink = (link: any) => {
     setActiveLink(link);
   };
 
@@ -26,7 +25,7 @@ const ExampleNavbar: FC = function () {
   return (
 
     <Navbar fluid rounded>
-      <Navbar.Brand href="/" className=" mt-4 my-4 ml-8"> 
+      <Navbar.Brand href="/" className=" mt-4 my-4 ml-8">
         <img alt="" src="/images/glass/logo.svg" className="mr-3 h-7 sm:h-12 dark:hidden" />
         <img alt="" src="/images/glass/logo.png" className="mr-3 h-7 sm:h-12 hidden dark:block" />
         <span className="self-center whitespace-nowrap text-2xl font-semibold dark:text-white"></span>
@@ -37,14 +36,14 @@ const ExampleNavbar: FC = function () {
         <Navbar.Toggle />
       </div>
       <Navbar.Collapse>
-        <Navbar.Link
+        {/* <Navbar.Link
           href="/Inventory"
           className={`flex items-center space-x-2 ${activeLink === 'Inventory' ? 'bg-blue text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
           onClick={() => handleSetActiveLink('Inventory')}
         >
           <FaBoxOpen className="mr-2" />
           <span>Inventory</span>
-        </Navbar.Link>
+        </Navbar.Link> */}
         <Navbar.Link
           href="/users"
           className={` flex items-center space-x-2 ${activeLink === 'users' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
@@ -77,6 +76,10 @@ const ExampleNavbar: FC = function () {
           <FaBoxOpen className="mr-2" />
           <span>Payrolls</span>
         </Navbar.Link>
+        <Navbar.Link href="/defaults" className={` flex items-center space-x-2 ${activeLink === 'defaults' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`} onClick={() => handleSetActiveLink('defaults')}>
+          <HiOutlineDocumentText className="mr-2" />
+          <span>Defaults</span>
+        </Navbar.Link>
         <Navbar.Link
           href="/reports"
           className={` flex items-center space-x-2 ${activeLink === 'reports' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
@@ -84,6 +87,14 @@ const ExampleNavbar: FC = function () {
         >
           <FaList className="mr-2" />
           <span>Reports</span>
+        </Navbar.Link>
+        <Navbar.Link
+          href="/bankReports" 
+          className={` flex items-center space-x-2 ${activeLink === 'bankReports' ? 'bg-blue  text-primary-700 hover:text-white font-extrabold hover:bg-blue-700 dark:bg-gray-800 dark:text-white border-b-2 border-transparent transition duration-200' : ''}`}
+          onClick={() => handleSetActiveLink('bankReports')}
+        >
+          <HiCurrencyDollar className="mr-2" />
+          <span>Bank Reports</span> 
         </Navbar.Link>
       </Navbar.Collapse>
     </Navbar>
