@@ -8,7 +8,6 @@ import { Flowbite } from "flowbite-react";
 import { Routes, Route } from "react-router";
 import { BrowserRouter } from "react-router-dom";
 import SignInPage from "./pages/authentication/login";
-import Inventory from "./pages/inventory/inventory";
 import UserListPage from "./pages/users/Users";
 import AllReports from "./pages/reports/reports";
 import BanksAll from "./pages/banks/banks";
@@ -38,14 +37,10 @@ root.render(
 
         <Route
           path="/"
-          element={user ? <Inventory /> : <Navigate to="/SignIn" />}
+          element={user ? <UserListPage /> : <Navigate to="/SignIn" />}
         />
 
-        <Route
-          path="/Inventory"
-          element={user ? <Inventory /> : <Navigate to="/SignIn" />}
-        />
-
+  
         <Route
           path="/users"
           element={user ? <UserListPage /> : <Navigate to="/SignIn" />}

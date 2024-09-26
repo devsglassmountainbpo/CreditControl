@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import {
     Modal,
     Select,
@@ -8,22 +7,19 @@ import {
     Label, Badge,
     Card, Alert
 } from "flowbite-react";
-import type { FC, JSXElementConstructor, Key, ReactElement, ReactFragment, ReactPortal } from "react";
+import type { FC } from "react";
 import React, { useEffect, useState } from "react";
 
 import { HiTable } from "react-icons/hi";
 import {
-    HiDocumentDownload,
     HiPlus,
 } from "react-icons/hi";
 
 import NavbarSidebarLayout2 from "../../layouts/navbar-sidebar2";
 import axios from "axios";
 import CryptoJS from "crypto-js";
-import { utils, writeFile } from 'xlsx-js-style';
-import { Calendar, Calendar2Date, Calendar2DateFill, FiletypeCsv, FiletypeXlsx, Icon0Circle } from 'react-bootstrap-icons';
-import UAParser from 'ua-parser-js';
-import * as XLSX from 'xlsx';
+import { Calendar } from 'react-bootstrap-icons';
+
 
 
 
@@ -44,10 +40,6 @@ const created_user = (created_user2 ? created_user2.toString(CryptoJS.enc.Utf8) 
 const PayrollAll: FC = function () {
 
     const [sharedState, setSharedState] = useState(false);
-    const updateSharedState = (newValue: boolean) => {
-
-        setSharedState(newValue);
-    }
 
 
     console.log('$%^CreateUser', created_user, setSharedState)
@@ -92,23 +84,13 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
     const [Filtrado, setFiltrado] = useState<Users[]>([]);
 
 
-    const [data, setData]: any = useState([]);
-    const [activeLink, setActiveLink] = useState('');
-
-
-    useEffect(() => {
-
-    }, [activeLink]);
-
-
-    console.log(activeLink)
 
     //filtrando datos para los reportes
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [graphisRes] = await Promise.all([
-                    axios.get('https://bn.glassmountainbpo.com:8080/test/credit/payments'),
+                    axios.get('http://127.0.0.1:5002/credit/payments'),
                 ]);
                 setDataGraphis(graphisRes.data);
             } catch (error) {
@@ -123,7 +105,7 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
         const fetchData3 = async () => {
             try {
                 const [dataPayroll] = await Promise.all([
-                    axios.get('https://bn.glassmountainbpo.com:8080/test/credit/list_payrolls'),
+                    axios.get('http://127.0.0.1:5002/credit/list_payrolls'),
                 ]);
                 setFiltrado(dataPayroll.data);
             } catch (error) {
@@ -172,7 +154,6 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
         }
     }, [sharedState]);
 
-    console.log(dataGraphis);
 
 
 
@@ -208,8 +189,6 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
                             <AddTaskModal
                                 sharedState={sharedState}
                             />
-                            <ExportModal
-                                data={data} />
                         </div>
 
                     </div>
@@ -250,9 +229,6 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
                             <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
                                 Completed
                             </Table.HeadCell>
-                            <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
-                                Actions
-                            </Table.HeadCell>
 
                         </Table.Head>
 
@@ -278,15 +254,6 @@ const Payroll: FC<any> = function ({ sharedState }: any) {
                                                 )}
                                             </Table.Cell>
                                         ))}
-                                        <Table.Cell>
-                                            <button
-                                                // onClick={exportToGraphis}
-                                                onClick={() => dataInject(Filtrado, row)}
-                                                className="dark:bg-gray-800 dark:hover:bg-indigo-500 hover:bg-indigo-500 bg-indigo-700 text-white font-bold py-1 px-1 rounded right-0 top-10 "
-                                            >
-                                                <HiTable className="h-7 w-7 " />
-                                            </button>
-                                        </Table.Cell>
                                     </Table.Row>
                                     {expandedRow === rowIndex && (
                                         <Table.Row className="bg-gray-100 dark:bg-gray-900" >
@@ -360,7 +327,7 @@ const Component = function (data: any) {
         const fetchData = async () => {
             try {
                 const [graphisRes] = await Promise.all([
-                    axios.get('https://bn.glassmountainbpo.com:8080/test/credit/list_payrolls'),
+                    axios.get('http://127.0.0.1:5002/credit/list_payrolls'),
                 ]);
 
                 setDataGraphis(graphisRes.data);
@@ -518,113 +485,6 @@ const Component = function (data: any) {
 }
 
 
-const dataInject = (w: any, item: any) => {
-
-    const id = item.id;
-    const dataFiltrado = w;
-
-    function goodDisplay(dateString: string | any): string {
-        const date: any = new Date(dateString);
-        const day = String(date.getUTCDate()).padStart(2, '0');
-        const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Los meses son 0-11
-        const year = String(date.getUTCFullYear()).slice(-2); // Obtener los últimos 2 dígitos del año
-
-        return `${day}/${month}/${year}`;
-    }
-
-    const filteredData = dataFiltrado.filter((user: { id_bank: any; }) => user.id_bank == id);
-    const data = filteredData;
-
-    const convertToCSV = (data: any) => {
-        const csvRows = [];
-        const allHeaders = Object.keys(data[0]);
-        const desiredOrder = ['id', 'name', 'badge', 'reference_number', 'credit_total', 'due', 'credit_start_date', 'credit_end_date', 'id_bank', 'name_bank', 'method_payment', 'bank_check_n', 'account_n', 'total_payment', 'status_credit', 'date_created'];
-
-        const headers = desiredOrder.filter(header => allHeaders.includes(header));
-
-        // Modificar las cabeceras según sea necesario
-        const modifiedHeaders = headers.map(header => {
-            if (header === 'date_created') {
-                return header.toUpperCase(); // Convertir a mayúsculas
-            } else if (header === 'bank_account') {
-                return 'BANK ACCOUNT'; // Cambiar el nombre de la cabecera
-            } else if (header === 'bank_check') {
-                return 'BANK CHECK'; // Cambiar el nombre de la cabecera
-            } else if (header === 'method') {
-                return 'METHOD'; // Cambiar el nombre de la cabecera
-            } else {
-                return header.toUpperCase(); // Convertir a mayúsculas
-            }
-        });
-
-        csvRows.push(modifiedHeaders.join(','));
-
-        for (const row of data) {
-            const values: any = headers.map(header => {
-                if (header === 'credit_start_date') {
-                    // Formatear las fechas como dd/mm/yyyy
-                    const date = new Date(row[header]);
-                    return goodDisplay(date)
-                    // return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-                } else if (header === 'date_created') {
-                    // Formatear las fechas como dd/mm/yyyy
-                    const date = new Date(row[header]);
-                    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-                } else if (header === 'credit_end_date') {
-                    // Formatear las fechas como dd/mm/yyyy
-                    const date = new Date(row[header]);
-                    return goodDisplay(date)
-                } else if (header === 'date_created') {
-                    // Formatear las fechas como dd/mm/yyyy
-                    const date = new Date(row[header]);
-                    return goodDisplay(date)
-                } else if (header === 'name') {
-                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
-                    return row[header].split(',').join(' - ');
-                } else if (header === 'credit_start_date') {
-                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
-                    return row[header].split(',').join(' - ');
-                } else if (header === 'credit_end_date') {
-                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
-                    return row[header].split(',').join(' - ');
-                } else if (header === 'name_bank') {
-                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
-                    return row[header].split(',').join(' - ');
-                } else if (header === 'date_created') {
-                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
-                    const date = new Date(row[header]);
-                    return goodDisplay(date)
-                }
-                else {
-                    return row[header];
-                }
-            });
-            csvRows.push(values.join(','));
-        }
-
-        return csvRows.join('\n');
-    };
-
-    // Function to export data to CSV and prompt download
-    const exportToCSV = () => {
-        console.log(data);
-
-        const csvContent = convertToCSV(data);
-        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' }); // Añadir BOM para Excel
-
-        // const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'PayrollsReports.csv';
-        a.click();
-        window.URL.revokeObjectURL(url);
-
-    };
-
-    exportToCSV();
-}
-
 
 const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any) {
     const [isOpen, setOpen] = useState(false);
@@ -734,7 +594,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
     console.log('estas son la categorias seleccionadas', methodPayment)
 
-    const url = `https://bn.glassmountainbpo.com:8080/test/api/hired_fullname/`;
+    const url = `http://127.0.0.1:5002/credit/hired_fullname/`;
 
     const handleTrack = () => {
         if (badge.length !== 0) {
@@ -752,7 +612,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
     //@_____________________Get  link banks _________________________
 
     useEffect(() => {
-        axios.get('https://bn.glassmountainbpo.com:8080/test/inventory/listBanks')
+        axios.get('http://127.0.0.1:5002/creditControl/listBanks')
             .then(res => {
 
                 // Filter data where supervisorBadge equals created_user
@@ -776,12 +636,9 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
         setSupervisorName('');
     };
 
-    console.log(result, supervisorName)
 
 
-
-
-    const url2 = `https://bn.glassmountainbpo.com:8080/test/inventory/addBank`;
+    const url2 = `http://127.0.0.1:5002/creditControl/addBank`;
     const handleSubmit = async (e: React.FormEvent) => {
         if (!nameBank) {
             alert('Enter a valid category name')
@@ -797,7 +654,6 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
                     methodPayment,
                     bankCheckPayment,
                     bankAccountNumber,
-                    info
                 })
                 if (response.status == 200) {
                     const responseData = response.data;
@@ -819,90 +675,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
     }
 
 
-    // auditoria 
-
-    interface BrowserInfo {
-        browser: string;
-        device: string;
-        os: string;
-        location: string; // Lugar que será obtenido después
-    }
-
-
-    const [info, setInfo] = useState<BrowserInfo>({
-        browser: '',
-        device: '',
-        os: '',
-        location: 'Unknown',
-    });
-
-    useEffect(() => {
-        // Obtiene información del navegador
-        const parser = new UAParser();
-        const browserName = parser.getBrowser().name || 'Unknown';
-        const deviceType = parser.getDevice().type || 'Unknown';
-        const osName = parser.getOS().name || 'Unknown';
-
-        // Actualiza información del navegador y dispositivo
-        setInfo({
-            ...info,
-            browser: browserName,
-            device: deviceType,
-            os: osName,
-        });
-
-        // Obtiene la ubicación geográfica (si el usuario lo permite)
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    setInfo((prevInfo) => ({
-                        ...prevInfo,
-                        location: `Lat: ${lat}, Lon: ${lon}`,
-                    }));
-                },
-                (error) => {
-                    console.error('Error obteniendo ubicación:', error);
-                }
-            );
-        }
-    }, []); // Solo se ejecuta una vez al montar el componente
-
-    console.log('XXXXXXXXXXXXXXXXXXXXXX info: ', info);
-
-    const [dataInternal, setDataInternal] = useState([] as any[]);
-
-    useEffect(() => {
-        axios.get('https://bn.glassmountainbpo.com:8080/test/inventory/listCategory')
-            .then(res => {
-                // If userLevel is not 2, set data as is
-                const filteredData = res.data.filter((item: { active: number; }) => item.active == 1);
-                setDataInternal(filteredData);
-
-            })
-    }, [created_user]); // Add userLevel and created_user to the dependency array
-
-
-
-
-    useEffect(() => {
-
-        console.log('Nombre del bancoooo', nameBank);
-        // if (nameBank === 'BANK CHECK') {
-        //     setBankCheckPayment('');
-        // } else if (methodPayment === 'ACCOUNT BANK NUMBER') {
-        //     setBankAccountNumber('');
-        // } else if (methodPayment === '') {
-        //     setBankCheckPayment('');
-        //     setBankAccountNumber('');
-        // }
-    }, [nameBank]);
-
-
     const [selectedBankId, setSelectedBankId] = useState<number | null>(null);
-
-    // Ejemplo de cómo podrías actualizar el estado con datos de una API o alguna fuente de datos
 
 
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -1257,257 +1030,19 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
 
 
-const ListPayments: FC<any> = function ({ data, id_filter }: any) {
+const ListPayments: FC<any> = function ({ data }: any) {
 
-    console.log('LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL', id_filter)
     const [isOpen, setOpen] = useState(false);
-    const [supBadge, setSupBadge] = useState<any>('');
-    const [result, setResult] = useState<any>([]);
-    const [supervisorName, setSupervisorName] = useState('');
-
-    const [name, setName] = useState(data[0].name);
-    const [statusActive, setStatusActive] = useState('');
-
-    // Bank Check Payment
-    const [bankCheckPayment, setBankCheckPayment] = useState('');
-    // Bank  account n
-    const [bankAccountNumber, setBankAccountNumber] = useState('');
-
-
-
-    const [methodPayment, setMethodCategory] = useState('');
-    // const [idCategory, setIdCategory] = useState('');
-
-    const cpm = data;
-
-
-    console.log('estas son la categorias seleccionadas', methodPayment)
-    console.log('esto es nuestro recurso', data)
-
-
-    const urlHired = `https://bn.glassmountainbpo.com:8080/test/api/hired/`;
-
-    const handleTrack = () => {
-        if (supBadge.length !== 0) {
-            axios.get(urlHired + supBadge)
-                .then((response => {
-                    setResult(response.data);
-                    const data = response.data;
-                    if (data.first_name !== undefined) {
-                        setSupervisorName(data.first_name + " " + data.second_name + " " + data.first_last_name + " " + data.second_last_name);
-                    } else {
-                        setSupervisorName('');
-                    }
-                }));
-        }
-    };
-
-    const handleKeyPress = (e: { key: string; }) => {
-        if (e.key === "Enter") {
-            handleTrack();
-        }
-    };
-
-
-    const resetFields = () => {
-        setName('');
-        setSupBadge('');
-        setStatusActive('');
-        setSupervisorName('');
-    };
-
-    console.log(result, supervisorName)
-
-
-
-
-    const url2 = `https://bn.glassmountainbpo.com:8080/test/inventory/addBank`;
-    // const handleSubmit = async (e: React.FormEvent) => {
-    //     if (!name) {
-    //         alert('Enter a valid category name')
-    //     } else if (!statusActive) {
-    //         alert('Enter a valid status!')
-    //     } else {
-    //         e.preventDefault()
-    //         try {
-    //             const response = await axios.post(url2, {
-    //                 name,
-    //                 statusActive,
-    //                 created_user,
-    //                 methodPayment,
-    //                 bankCheckPayment,
-    //                 bankAccountNumber,
-    //                 info
-    //             })
-    //             if (response.status == 200) {
-    //                 const responseData = response.data;
-    //                 // updateSharedState(!sharedState);
-
-    //                 if (responseData.message === "ok") {
-    //                     setOpen(false);
-    //                     resetFields();
-    //                     alert('Brand created successfully!')
-    //                 } else {
-    //                     console.log("Fatal Error");
-    //                 }
-    //             }
-    //         } catch (error) {
-    //             console.log(error);
-    //             setOpen(false)
-    //         }
-    //     }
-    // }
-
-
-
-    const handleSubmit = async (e: any) => {
-        e.preventDefault();
-        let reportUrl = '';
-
-        reportUrl = `https://bn.glassmountainbpo.com:8080/test/creditControl/reportTwo/${data[0].badge}`;
-
-        try {
-            const response = await axios.get(reportUrl);
-            const data = response.data;
-            const csv = jsonToCsv(data);
-            downloadCsv(csv, `Payment_report_${data[0].badge}.csv`);
-        } catch (error) {
-            console.error('Error fetching the report:', error);
-        }
-    };
-
-
-    const handleSubmit2 = async (e: any) => {
-        e.preventDefault();
-        let reportUrl = '';
-        reportUrl = `https://bn.glassmountainbpo.com:8080/test/creditControl/reportOne/${data[0].badge}`;
-        try {
-            const response = await axios.get(reportUrl);
-            const data = response.data;
-            const csv = jsonToCsv(data);
-            downloadCsv(csv, `Payment_report_${data[0].badge}.csv`);
-        } catch (error) {
-            console.error('Error fetching the report:', error);
-        }
-    };
-
-    const jsonToCsv = (json: any) => {
-        const headers = Object.keys(json[0]);
-        const csvRows = [headers.join(','), ...json.map((row: any) =>
-            headers.map(header => `"${row[header]}"`).join(',')
-        )];
-        return csvRows.join('\n');
-    };
-
-    const downloadCsv = (csv: string, filename: string) => {
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
-
-    // auditoria 
-
-    interface BrowserInfo {
-        browser: string;
-        device: string;
-        os: string;
-        location: string; // Lugar que será obtenido después
-    }
-
-
-    const [info, setInfo] = useState<BrowserInfo>({
-        browser: '',
-        device: '',
-        os: '',
-        location: 'Unknown',
-    });
-
-    useEffect(() => {
-        // Obtiene información del navegador
-        const parser = new UAParser();
-        const browserName = parser.getBrowser().name || 'Unknown';
-        const deviceType = parser.getDevice().type || 'Unknown';
-        const osName = parser.getOS().name || 'Unknown';
-
-        // Actualiza información del navegador y dispositivo
-        setInfo({
-            ...info,
-            browser: browserName,
-            device: deviceType,
-            os: osName,
-        });
-
-        // Obtiene la ubicación geográfica (si el usuario lo permite)
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    setInfo((prevInfo) => ({
-                        ...prevInfo,
-                        location: `Lat: ${lat}, Lon: ${lon}`,
-                    }));
-                },
-                (error) => {
-                    console.error('Error obteniendo ubicación:', error);
-                }
-            );
-        }
-    }, []); // Solo se ejecuta una vez al montar el componente
-
-    console.log('XXXXXXXXXXXXXXXXXXXXXX info: ', info);
-
-    const [dataInternal, setDataInternal] = useState([] as any[]);
-
-    useEffect(() => {
-        axios.get('https://bn.glassmountainbpo.com:8080/test/inventory/listCategory')
-            .then(res => {
-                // If userLevel is not 2, set data as is
-                const filteredData = res.data.filter((item: { active: number; }) => item.active == 1);
-                setDataInternal(filteredData);
-
-            })
-    }, [created_user]); // Add userLevel and created_user to the dependency array
-
-
-
-
-    useEffect(() => {
-        if (methodPayment === 'BANK CHECK') {
-            setBankCheckPayment('');
-        } else if (methodPayment === 'ACCOUNT BANK NUMBER') {
-            setBankAccountNumber('');
-        } else if (methodPayment === '') {
-            setBankCheckPayment('');
-            setBankAccountNumber('');
-        }
-    }, [methodPayment]);
-
 
 
     return (
         <>
-            {/* <Button color="primary" onClick={() => { setOpen(true) }}>
-                <div className="flex items-center gap-x-3">
-                    <HiPlus className="text-xl" />
-                    Add Payrolls
-                </div>
-            </Button> */}
             <Button className="bg-yellow-300 hover:bg-yellow-400" onClick={() => { setOpen(true) }}>   <HiTable className="text-xl"></HiTable></Button>
             <Modal onClose={() => setOpen(false)} show={isOpen} className="w-full sm:grid-cols-3">
                 <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700 text-gray-200">
                     <Label>Payment management!</Label>
                 </Modal.Header>
                 <Modal.Body>
-                    {/*      
-                    <div className="overflow-x-auto mt-5 bg-gray-100 rounded-md">
-                        <h3 className=" ml-5 text-1sm" >Detalle de pago</h3>
-                    </div> */}
                     <div className="overflow-x-auto mt-0 bg-gray-100 rounded-md">
                         <Card className="max-w-auto">
                             <div className="flex">
@@ -1566,228 +1101,23 @@ const ListPayments: FC<any> = function ({ data, id_filter }: any) {
                             </p>
 
                             <div className="items-center pt-7 justify-center space-y-4 sm:flex sm:space-x-4 sm:space-y-0">
-                                <a
-                                    href="#"
-                                    className="inline-flex w-full items-center justify-center rounded-lg bg-primary-600 px-12 py-2.5 text-white hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 sm:w-auto"
-                                    onClick={(e) => { handleSubmit2(e) }}
-                                >
-
-                                    <div className="text-left">
+                                    <div className="text-left cursor-pointer bg-primary-200 rounded-lg px-12 py-2.5 text-white hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 sm:w-auto">
                                         <div className="mb-1 text-sm">Credit Total</div>
                                         <div className="-mt-1 font-sans text-1xl font-semibold">${data[0].credit_total}</div>
                                     </div>
-                                </a>
-                                <a
-                                    href="#"
-                                    className="inline-flex w-full items-center justify-center rounded-lg bg-green-500 px-12 py-2.5 text-white hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 sm:w-auto"
-                                    onClick={(e) => { handleSubmit(e) }}
-                                >
-                                    <div className="text-left">
+                                    <div className="text-left cursor-pointer bg-green-200 rounded-lg px-12 py-2.5 text-white hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 sm:w-auto">
                                         <div className="mb-1 text-sm">Pending Payment
                                         </div>
                                         <div className="-mt-1 ml-9 font-sans text-1xl font-semibold">{data[0].pending_payment}</div>
                                     </div>
-                                </a>
                             </div>
                         </Card>
                     </div>
-
-
                 </Modal.Body>
-                {/* <Modal.Footer>
-                    <Button
-                        color="primary"
-                        onClick={(e) => { handleSubmit(e) }}>
-                        Save
-                    </Button>
-                </Modal.Footer> */}
             </Modal >
         </>
     );
 };
-
-
-
-
-
-const ExportModal: FC<any> = function (rawData) {
-    const [isOpen, setOpen] = useState(false);
-
-
-
-    function goodDisplay(dateString: string | any): string {
-        const date: any = new Date(dateString);
-        const day = String(date.getUTCDate()).padStart(2, '0');
-        const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Los meses son 0-11
-        const year = String(date.getUTCFullYear()).slice(-2); // Obtener los últimos 2 dígitos del año
-
-        return `${day}/${month}/${year}`;
-    }
-
-
-    interface User {
-        name: string;
-        id: string;
-        id_bank: string;
-        badge: string;
-        reference_number: string;
-        active: string;
-        credit_start_date: string;
-        credit_end_date: string;
-        status_credit: string;
-        pending_payment: string;
-        credit_total: string;
-        total_payment: number;
-        date_created: string;
-        date: string;
-    }
-
-    const [dataGraphis, setDataGraphis] = useState<User[]>([]);
-
-
-    const data = dataGraphis;
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [graphisRes] = await Promise.all([
-                    axios.get('https://bn.glassmountainbpo.com:8080/test/credit/list_payrolls'),
-                ]);
-
-                setDataGraphis(graphisRes.data);
-
-
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-
-    const convertToCSV = (data: any) => {
-        const csvRows = [];
-        const allHeaders = Object.keys(data[0]);
-        const desiredOrder = ['id', 'name', 'badge', 'reference_number', 'credit_total', 'due', 'credit_start_date', 'credit_end_date', 'id_bank', 'name_bank', 'method_payment', 'bank_check_n', 'account_n', 'total_payment', 'status_credit', 'date_created'];
-
-        const headers = desiredOrder.filter(header => allHeaders.includes(header));
-
-        // Modificar las cabeceras según sea necesario
-        const modifiedHeaders = headers.map(header => {
-            if (header === 'date_created') {
-                return header.toUpperCase(); // Convertir a mayúsculas
-            } else if (header === 'bank_account') {
-                return 'BANK ACCOUNT'; // Cambiar el nombre de la cabecera
-            } else if (header === 'bank_check') {
-                return 'BANK CHECK'; // Cambiar el nombre de la cabecera
-            } else if (header === 'method') {
-                return 'METHOD'; // Cambiar el nombre de la cabecera
-            } else {
-                return header.toUpperCase(); // Convertir a mayúsculas
-            }
-        });
-
-        csvRows.push(modifiedHeaders.join(','));
-
-        for (const row of data) {
-            const values: any = headers.map(header => {
-                if (header === 'credit_start_date') {
-                    // Formatear las fechas como dd/mm/yyyy
-                    const date = new Date(row[header]);
-                    return goodDisplay(date)
-                    // return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-                } else if (header === 'date_created') {
-                    // Formatear las fechas como dd/mm/yyyy
-                    const date = new Date(row[header]);
-                    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-                } else if (header === 'credit_end_date') {
-                    // Formatear las fechas como dd/mm/yyyy
-                    const date = new Date(row[header]);
-                    return goodDisplay(date)
-                } else if (header === 'date_created') {
-                    // Formatear las fechas como dd/mm/yyyy
-                    const date = new Date(row[header]);
-                    return goodDisplay(date)
-                } else if (header === 'name') {
-                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
-                    return row[header].split(',').join(' - ');
-                } else if (header === 'credit_start_date') {
-                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
-                    return row[header].split(',').join(' - ');
-                } else if (header === 'credit_end_date') {
-                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
-                    return row[header].split(',').join(' - ');
-                } else if (header === 'name_bank') {
-                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
-                    return row[header].split(',').join(' - ');
-                } else if (header === 'date_created') {
-                    // Formatear los ID Groups como "400 - 401 - 402 - 403 - 404"
-                    const date = new Date(row[header]);
-                    return goodDisplay(date)
-                }
-                else {
-                    return row[header];
-                }
-            });
-            csvRows.push(values.join(','));
-        }
-
-        return csvRows.join('\n');
-    };
-
-
-
-
-    // Function to export data to CSV and prompt download
-    const exportToCSV = () => {
-        console.log(data);
-
-        const csvContent = convertToCSV(data);
-        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' }); // Añadir BOM para Excel
-
-        // const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'PayrollsReports.csv';
-        a.click();
-        window.URL.revokeObjectURL(url);
-        setOpen(false);
-    };
-
-
-    return (
-        <>
-            <Button onClick={() => setOpen(true)} className="bg-indigo-600 hover:bg-indigo-800 dark:bg-indigo-900 dark:hover-bg-indigo-500" >
-                <div className="flex items-center gap-x-3 ">
-                    <HiDocumentDownload className="text-xl" />
-                    <span>Export</span>
-                </div>
-            </Button>
-            <Modal onClose={() => setOpen(false)} show={isOpen} size="md">
-                <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-                    <strong>Export Payrolls</strong>
-                </Modal.Header>
-                <Modal.Body className="flex flex-col items-center gap-y-6 text-center">
-                    <div className="flex items-center gap-x-3">
-                        <div>
-                            <Button onClick={exportToCSV} color="light">
-                                <div className="flex items-center gap-x-3">
-                                    <FiletypeCsv className="text-xl" />
-                                    <span>Export CSV</span>
-                                </div>
-                            </Button>
-                        </div>
-
-                    </div>
-                </Modal.Body>
-
-            </Modal>
-        </>
-    )
-
-}
 
 
 

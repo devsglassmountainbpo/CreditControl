@@ -32,7 +32,7 @@ export const UserToggle: FC = function () {
   }
 
   useEffect(() => {
-    axios.get('https://bn.glassmountainbpo.com:8080/test/api/hired/' + user)
+    axios.get('https://bn.glassmountainbpo.com:8080/main/api/hired/' + user)
       .then(res => setData(res.data))
   }, [])
 
@@ -119,7 +119,7 @@ const EditUserModal: FC<any> = function ({ firstName, lastName, username, badge 
     // handlePasswordChange();
     if (passwordsMatch === true) {
       try {
-        const response = await axios.post('https://bn.glassmountainbpo.com:8080/test/edit/resetpwd', {
+        const response = await axios.post('http://127.0.0.1:5002/edit/resetpwd', {
           badge, 
           username,
           password,

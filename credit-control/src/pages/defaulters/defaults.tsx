@@ -1,3 +1,4 @@
+
 import NavbarSidebarLayout2 from '../../layouts/navbar-sidebar2'
 import { Label, Table, TextInput } from 'flowbite-react';
 import { defaultersBackgroundImage } from '../../utils/constants';
@@ -86,8 +87,8 @@ const Defaults = () => {
                         <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
                             Credit Total
                         </Table.HeadCell>
-                        <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
-                            Total of Unpaid Installments
+                        <Table.HeadCell scope="col" className=" bg-gray-200 dark:bg-gray-600">
+                            Unpaid Installments
                         </Table.HeadCell>
                         <Table.HeadCell scope="col" className="py-3 px-6 bg-gray-200 dark:bg-gray-600">
                             Credit Start Date
@@ -149,7 +150,7 @@ const Defaults = () => {
                                 <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
                                     ${row.credit_total}
                                 </Table.Cell>
-                                <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
+                                <Table.Cell className="whitespace-normal p-4 text-base font-medium text-gray-900 dark:text-white">
                                     {row.total_payment}
                                 </Table.Cell>
                                 <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">

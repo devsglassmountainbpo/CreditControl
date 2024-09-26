@@ -3,46 +3,97 @@ import NavbarSidebarLayout2 from "../../layouts/navbar-sidebar2";
 import { Button, Card, Label, Select } from 'flowbite-react';
 import { HiDocumentDownload } from 'react-icons/hi';
 import useCreditData from '../../hooks/useCreditData';
-import { CreditRecord } from '../../types';
+import { CreditRecord, ReportType } from '../../types';
 import { currentMonth, months } from '../../utils/constants';
 import { formatDateHelper, generateQuarterCode, } from '../../utils/helpers';
 import * as XLSX from 'xlsx';
 
 
 const BankReports = () => {
-  const { filteredData } = useCreditData();
+  const { filteredData, isLoading } = useCreditData();
   const [quarter, setQuarter] = useState('Q1-');
   const [quarterMonth, setQuarterMonth] = useState(currentMonth);
-  const [reportType, setReportType] = useState('');
+  const [reportType, setReportType] = useState<ReportType>('payroll');
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = (format: string) => {
 
     const quarterCode = generateQuarterCode(quarter, quarterMonth);
-    generateExcelFile(filteredData, quarterCode);
+    if (format === 'Quarter') {
+      generateQuarterReport(filteredData, quarterCode);
+      return;
+    }
+    generateAllReports(filteredData, reportType);
   };
 
-  const generateExcelFile = (data: CreditRecord[], quarter: String) => {
-    const orderedData = data.map((item: CreditRecord) => ({
-      ID: item.id,
-      Name: item.name_,
-      Badge: item.badge,
-      Reference: item.reference_number,
-      Bank: item.name_bank,
-      Due: item.due,
-      CreditTotal: item.credit_total,
-      TotalOfUnpaidInstallments: item.total_payment,
-      CreditStartDate: formatDateHelper(item.credit_start_date),
-      CreditEndDate: formatDateHelper(item.credit_end_date),
-      DateCreated: formatDateHelper(item.date_created),
-      Status: item.status_credit,
-      Quarter: quarter,
-    }));
+
+  const generateAllReports = (data: CreditRecord[], reportType: ReportType) => {
+    const reportMappings: Record<ReportType, (item: CreditRecord) => Record<string, any>> = {
+      payroll: (item) => ({
+        ID: item.id,
+        Name: item.name_,
+        Badge: item.badge,
+        Due: item.due,
+        Active: item.active,
+        TotalPayments: item.total_payment,
+        credit_start_date: formatDateHelper(item.credit_start_date),
+        credit_end_date: formatDateHelper(item.credit_end_date),
+        DateCreated: formatDateHelper(item.date_created),
+        Status: item.status_credit,
+        Quarter: item.quarter,
+      }),
+      payments: (item) => ({
+        ID: item.id,
+        Badge: item.badge,
+        Bank: item.name_bank,
+        Active: item.active,
+        TotalPayments: item.total_payment,
+        credit_start_date: formatDateHelper(item.credit_start_date),
+        credit_end_date: formatDateHelper(item.credit_end_date),
+        DateCreated: formatDateHelper(item.date_created),
+        Status: item.status_credit,
+        Quarter: item.quarter,
+      }),
+    };
+
+    const mapFunction = reportMappings[reportType];
+    const orderedData = data.map(mapFunction);
+
     const ws = XLSX.utils.json_to_sheet(orderedData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
     XLSX.writeFile(wb, 'BankReports.xlsx');
-
   };
+
+  const generateQuarterReport = (data: CreditRecord[], quarter: String) => {
+    const quarterData = data.filter(item => item.quarter === quarter);
+    const reportMappings: Record<ReportType, (item: CreditRecord) => Record<string, any>> = {
+      payroll: (item) => ({
+        ID: item.id,
+        Name: item.name_,
+        Badge: item.badge,
+        Due: item.due,
+        Active: item.active,
+        Quarter: item.quarter,
+      }),
+      payments: (item) => ({
+        ID: item.id,
+        Badge: item.badge,
+        Bank: item.name_bank,
+        Active: item.active,
+        Quarter: item.quarter,
+      }),
+    };
+
+    const mapFunction = reportMappings[reportType];
+    const orderedData = quarterData.map(mapFunction);
+
+    // Crea el excel
+    const ws = XLSX.utils.json_to_sheet(orderedData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    XLSX.writeFile(wb, 'BankReports.xlsx');
+  };
+
 
   return (
     <NavbarSidebarLayout2 isFooter={true}>
@@ -57,14 +108,12 @@ const BankReports = () => {
               <Select
                 id="report-type"
                 value={reportType}
-                onChange={(e) => setReportType(e.target.value)}
+                onChange={(e) => setReportType(e.target.value as ReportType)}
                 required
               >
                 <option value="" disabled>Select report type</option>
-                <option value="transactions">Transactions Report</option>
-                <option value="loans">Loans Report</option>
-                <option value="accounts">Accounts Summary</option>
-                <option value="performance">Performance Metrics</option>
+                <option value="payroll">Payrolls</option>
+                <option value="payments">Payments</option>
               </Select>
             </div>
             <div className="flex flex-col gap-2 w-1/6 sm:pr-4">
@@ -99,11 +148,19 @@ const BankReports = () => {
             </div>
 
           </div>
-          <div className="mt-4">
-            <Button onClick={handleGenerateReport} color="primary">
-              <HiDocumentDownload className="mr-2 h-5 w-5" />
-              Generate and Export Report
-            </Button>
+          <div className="flex flex-row gap-6 justify-start" style={{ zoom: 0.90 }}>
+            <div className="mt-4">
+              <Button onClick={() => handleGenerateReport('All')} disabled={isLoading} color="primary">
+                <HiDocumentDownload className="mr-2 h-5 w-5" />
+                Generate All Time Report
+              </Button>
+            </div>
+            <div className="mt-4">
+              <Button onClick={() => handleGenerateReport('Quarter')} disabled={isLoading} color="primary">
+                <HiDocumentDownload className="mr-2 h-5 w-5" />
+                Generate Quarter Report
+              </Button>
+            </div>
           </div>
         </Card>
       </div>

@@ -21,7 +21,7 @@ export const EditDetailsAssetModal: FC<EditDetailsAssetModalProps> = ({ details,
     const [newBrand, setNewBrand] = useState(brand);
     const [newModel, setNewModel] = useState(model);
 
-    const url = 'https://bn.glassmountainbpo.com:8080/test/inventory/editDetails';
+    const url = 'http://127.0.0.1:5002/creditControl/editDetails';
 
     const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();

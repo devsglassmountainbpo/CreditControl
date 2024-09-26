@@ -1,7 +1,4 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import {
-    Table,
-    Badge,
     Button,
     Modal,
     Label,
@@ -9,32 +6,25 @@ import {
     Select
 
 } from "flowbite-react";
-import type { FC, JSXElementConstructor, Key, ReactElement, ReactFragment, ReactPortal } from "react";
-import { useEffect, useState } from "react";
+import type { FC } from "react";
+import { useState } from "react";
 
-import { HiOutlinePencilAlt, HiSearch } from "react-icons/hi";
+import {  HiSearch } from "react-icons/hi";
 
 
 import NavbarSidebarLayout2 from "../../layouts/navbar-sidebar2";
 import axios from "axios";
-import { Accordion } from "flowbite-react";
-
-
-import CryptoJS from "crypto-js";
-import { utils, writeFile } from 'xlsx-js-style';
 
 
 
-const created_user3 = localStorage.getItem("badgeSession") || "";
-const created_user2 = (created_user3 ? CryptoJS.AES.decrypt(created_user3, "Tyrannosaurus") : "");
-const created_user = (created_user2 ? created_user2.toString(CryptoJS.enc.Utf8) : "");
+
 
 
 const AllReports: FC = function () {
 
     const [isOpen, setOpen] = useState(false);
 
-    const url = `https://bn.glassmountainbpo.com:8080/test/vendors/hired/`;
+    const url = `http://127.0.0.1:5002/vendors/hired/`;
 
     const [result, setResult] = useState<any>([]); //JSON Axios Data
     const [badge, setBadge] = useState<any>(''); //Badge
@@ -63,9 +53,9 @@ const AllReports: FC = function () {
         e.preventDefault();
         let reportUrl = '';
         if (report === 'Payroll') {
-            reportUrl = `https://bn.glassmountainbpo.com:8080/test/creditControl/reportOne/${badge}`;
+            reportUrl = `http://127.0.0.1:5002/creditControl/reportOne/${badge}`;
         } else if (report === 'Payment') {
-            reportUrl = `https://bn.glassmountainbpo.com:8080/test/creditControl/reportTwo/${badge}`;
+            reportUrl = `http://127.0.0.1:5002/creditControl/reportTwo/${badge}`;
         }
 
         try {

@@ -55,4 +55,29 @@ export type CreditRecord = {
     photo?: string;
     name_bank?: string;
     due?: string;
+    quarter?: string;
+    active: number;
 };
+
+export type PayrollRecord = 
+Omit<CreditRecord, 
+'name_bank' | 
+'reference_number' | 
+'credit_total' | 
+'total_payment' | 
+'credit_start_date' | 
+'credit_end_date' | 
+'date_created' | 
+'status_credit'> 
+
+export type PaymentsRecord = 
+Omit<CreditRecord,
+'name_' |
+'due' |
+'credit_total' | 
+'total_payment' | 
+'credit_start_date' | 
+'date_created' | 
+'status_credit'>
+
+export type ReportType = 'payroll' | 'payments';

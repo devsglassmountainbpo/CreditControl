@@ -36,7 +36,7 @@ const created_user3 = localStorage.getItem("badgeSession") || "";
 const created_user2 = (created_user3 ? CryptoJS.AES.decrypt(created_user3, "Tyrannosaurus") : "");
 const created_user = (created_user2 ? created_user2.toString(CryptoJS.enc.Utf8) : "");
 
-const ArrayBagde = ['3199', '3814', '3897', '2181'];
+const ArrayBagde = ['3199', '3814', '3897', '2181', '4432'];
 const condicion = ArrayBagde.includes(created_user) ? '1' : '0';
 console.log('========Esta es la condicion:', condicion);
 
@@ -64,7 +64,7 @@ const UserListPage: FC = function () {
     }
 
     useEffect(() => {
-        axios.get('https://bn.glassmountainbpo.com:8080/test/creditControl/users')
+        axios.get('http://127.0.0.1:5002/creditControl/users')
             .then(res => setData(res.data))
     }, [sharedState])
 
@@ -488,26 +488,12 @@ const UserListPage: FC = function () {
     );
 };
 
-// const GetUserInfo: FC<any> = function (badge: any) {
-//   const [hiredData, setHiredData] = useState<any>([]);
 
-//   useEffect(() => {
-//     axios.get('http://bn.glassmountainbpo.com:8080/api/hired/' + Object.values(badge))
-//     .then((res) => {setHiredData(res.data)})
-//     .catch(error => console.log(error))
-//   }, [])
-
-//   return (
-//     <>
-//     {hiredData.badge}
-//     </>
-//   )
-// };
 
 const AddUserModal: FC = function () {
     const [isOpen, setOpen] = useState(false);
 
-    const url = `https://bn.glassmountainbpo.com:8080/test/gift/hired/`;
+    const url = `https://bn.glassmountainbpo.com:8080/main/api/hired/`;
 
     const [result, setResult] = useState<any>([]); //JSON Axios Data
     const [badge, setBadge] = useState<any>(''); //Badge
@@ -542,7 +528,7 @@ const AddUserModal: FC = function () {
     const handleSubmit = async (e: React.FormEvent, id_rol: any, id_job: any) => {
         e.preventDefault()
         try {
-            const response = await axios.post('https://bn.glassmountainbpo.com:8080/test/creditControl/save', {
+            const response = await axios.post('http://127.0.0.1:5002/creditControl/save', {
                 badge,
                 username,
                 password,
@@ -731,7 +717,7 @@ const EditUserModal: FC<any> = function ({ badge, username, userDepartment, user
         sendRole !== '' ? role = sendRole : role = role;
         username = username;
         try {
-            const response = await axios.post('https://bn.glassmountainbpo.com:8080/test/user_IT/edit', {
+            const response = await axios.post('http://127.0.0.1:5002/userCreditControl/edit', {
                 badge,
                 username,
                 password,
@@ -896,7 +882,7 @@ const DeleteUserModal: FC<any> = function ({ badge, status, created_user, shared
     const handleSubmit = async (e: React.FormEvent, badge: any, status: any, created_user: any) => {
         e.preventDefault()
         try {
-            const response = await axios.post('https://bn.glassmountainbpo.com:8080/test/inventory/statusIT', {
+            const response = await axios.post('http://127.0.0.1:5002/creditControl/statusIT', {
                 badge,
                 status,
                 created_user
@@ -1038,7 +1024,7 @@ const DeleteUsersModal: FC<any> = function ({ users, created_user, sharedState, 
     const handleSubmit = async (e: React.FormEvent, dataToSend: string, created_user: any) => {
         e.preventDefault()
         try {
-            const response = await axios.post('https://bn.glassmountainbpo.com:8080/test/inventory/desactivateUsers', {
+            const response = await axios.post('http://127.0.0.1:5002/creditControl/desactivateUsers', {
                 dataToSend,
                 created_user
             })
@@ -1097,7 +1083,7 @@ const ActivateUsersModal: FC<any> = function ({ users, created_user, sharedState
     const handleSubmit = async (e: React.FormEvent, dataToSend: string, created_user: any) => {
         e.preventDefault()
         try {
-            const response = await axios.post('https://bn.glassmountainbpo.com:8080/test/inventory/activateUsers', {
+            const response = await axios.post('http://127.0.0.1:5002/creditControl/activateUsers', {
                 dataToSend,
                 created_user
             })
@@ -1148,53 +1134,6 @@ const ActivateUsersModal: FC<any> = function ({ users, created_user, sharedState
     );
 };
 
-// export const Pagination: FC = function () {
-//   return (
-//     <div className="sticky right-0 bottom-0 w-full items-center border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 sm:flex sm:justify-between">
-//       <div className="mb-4 flex items-center sm:mb-0">
-//         <a
-//           href="#"
-//           className="inline-flex cursor-pointer justify-center rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-//         >
-//           <span className="sr-only">Previous page</span>
-//           <HiChevronLeft className="text-2xl" />
-//         </a>
-//         <a
-//           href="#"
-//           className="mr-2 inline-flex cursor-pointer justify-center rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-//         >
-//           <span className="sr-only">Next page</span>
-//           <HiChevronRight className="text-2xl" />
-//         </a>
-//         <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-//           Showing&nbsp;
-//           <span className="font-semibold text-gray-900 dark:text-white">
-//             1-10
-//           </span>
-//           &nbsp;of&nbsp;
-//           <span className="font-semibold text-gray-900 dark:text-white">
-//             229
-//           </span>
-//         </span>
-//       </div>
-//       <div className="flex items-center space-x-3">
-//         <a
-//           href="#"
-//           className="inline-flex flex-1 items-center justify-center rounded-lg bg-primary-700 py-2 px-3 text-center text-sm font-medium text-white hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-//         >
-//           <HiChevronLeft className="mr-1 text-base" />
-//           Previous
-//         </a>
-//         <a
-//           href="#"
-//           className="inline-flex flex-1 items-center justify-center rounded-lg bg-primary-700 py-2 px-3 text-center text-sm font-medium text-white hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-//         >
-//           Next
-//           <HiChevronRight className="ml-1 text-base" />
-//         </a>
-//       </div>
-//     </div>
-//   );
-// };
+
 
 export default UserListPage;

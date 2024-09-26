@@ -38,7 +38,7 @@ const created_user3 = localStorage.getItem("badgeSession") || "";
 const created_user2 = (created_user3 ? CryptoJS.AES.decrypt(created_user3, "Tyrannosaurus") : "");
 const created_user = (created_user2 ? created_user2.toString(CryptoJS.enc.Utf8) : "");
 
-const ArrayBagde = ['3199', '3814', '3897', '2181'];
+const ArrayBagde = ['3199', '3814', '3897', '2181', '4432'];
 const condicion = ArrayBagde.includes(created_user) ? '1' : '0';
 
 const userLevel3 = localStorage.getItem("userLevel") || "";
@@ -61,7 +61,7 @@ const BanksAll: FC = function () {
     }
 
     useEffect(() => {
-        axios.get('https://bn.glassmountainbpo.com:8080/test/inventory/listBanks')
+        axios.get('http://127.0.0.1:5002/creditControl/listBanks')
             .then(res => {
                 if (userLevel === '2') {
                     // Filter data where supervisorBadge equals created_user
@@ -133,18 +133,6 @@ const BanksAll: FC = function () {
     const dataLength = (searchInput.length > 1 ? filteredResults : (dataTemp.length === 0 ? data : data)).length
 
     const paginate = (pageNumber: SetStateAction<number>) => setCurrentPage(pageNumber);
-
-
-    // const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({
-    //     Available: false,
-    //     Delivered: false,
-    //     Assigned: false,
-    // });
-
-    // useEffect(() => {
-    //     console.log('checkedItems ha cambiado:', checkedItems);
-
-    // }, [setCheckedItems]); // Depende de `checkedItems`
 
     useEffect(() => {
         const initialData = [...data];
@@ -440,7 +428,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
     console.log('estas son la categorias seleccionadas', methodPayment)
 
 
-    const urlHired = `https://bn.glassmountainbpo.com:8080/test/api/hired/`;
+    const urlHired = `https://bn.glassmountainbpo.com:8080/main/api/hired/`;
 
     const handleTrack = () => {
         if (supBadge.length !== 0) {
@@ -476,7 +464,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
 
 
 
-    const url2 = `https://bn.glassmountainbpo.com:8080/test/inventory/addBank`;
+    const url2 = `http://127.0.0.1:5002/creditControl/addBank`;
     const handleSubmit = async (e: React.FormEvent) => {
         if (!name) {
             alert('Enter a valid category name')
@@ -564,20 +552,7 @@ const AddTaskModal: FC<any> = function ({ sharedState, updateSharedState }: any)
         }
     }, []); // Solo se ejecuta una vez al montar el componente
 
-    console.log('XXXXXXXXXXXXXXXXXXXXXX info: ', info);
-
-    const [dataInternal, setDataInternal] = useState([] as any[]);
-
-    useEffect(() => {
-        axios.get('https://bn.glassmountainbpo.com:8080/test/inventory/listCategory')
-            .then(res => {
-                // If userLevel is not 2, set data as is
-                const filteredData = res.data.filter((item: { active: number; }) => item.active == 1);
-                setDataInternal(filteredData);
-
-            })
-    }, [created_user]); // Add userLevel and created_user to the dependency array
-
+   
 
 
 
@@ -761,7 +736,7 @@ const EditUserModal: FC<any> = function ({ id, active, name, sharedState, update
         }
         e.preventDefault()
         try {
-            const response = await axios.post('https://bn.glassmountainbpo.com:8080/test/inventory/editBank', {
+            const response = await axios.post('http://127.0.0.1:5002/creditControl/editBank', {
                 id,
                 nameBank,
                 status,
